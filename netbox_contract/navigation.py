@@ -118,7 +118,7 @@ items = (
 if plugin_settings.get('top_level_menu'):
     menu = PluginMenu(
         label=_('Contracts'),
-        groups=(('Contracts', items),),
+        groups=((_('Contracts'), items),),
         icon_class='mdi mdi-file-sign',
     )
 else:

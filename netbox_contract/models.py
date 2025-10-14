@@ -34,8 +34,8 @@ class AccountingDimensionStatusChoices(ChoiceSet):
     STATUS_INACTIVE = 'inactive'
 
     CHOICES = [
-        (STATUS_ACTIVE, 'Active', 'green'),
-        (STATUS_INACTIVE, 'Inactive', 'red'),
+        (STATUS_ACTIVE, _('Active1'), 'green'),
+        (STATUS_INACTIVE, _('Inactive1'), 'red'),
     ]
 
 

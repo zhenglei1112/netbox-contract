@@ -296,7 +296,7 @@ class ContractTypeFilterForm(NetBoxModelFilterSetForm):
 class InvoiceForm(NetBoxModelForm):
     number = forms.CharField(
         max_length=100,
-        help_text='Invoice template name will be overriden to _invoice_template_contract name',
+        help_text=_('Invoice template name will be overriden to _invoice_template_contract name'),
         label=_('Number'),
     )
     contracts = DynamicModelMultipleChoiceField(
