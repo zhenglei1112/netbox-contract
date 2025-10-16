@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-14 10:16+0800\n"
-"PO-Revision-Date: 2025-10-15 09:26+0800\n"
+"POT-Creation-Date: 2025-10-16 20:41+0800\n"
+"PO-Revision-Date: 2025-10-16 20:42+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh\n"
@@ -552,7 +552,7 @@ msgstr "每年费用"
 
 #: .\netbox_contract\templates\netbox_contract\contract.html:96
 msgid "Calculated corresponding Yearly or Monthly value"
-msgstr "月费用（计算）"
+msgstr "年度费用（计算）"
 
 #: .\netbox_contract\templates\netbox_contract\contract.html:100
 msgid "Non recuring costs"
@@ -561,6 +561,10 @@ msgstr "一次性费用"
 #: .\netbox_contract\templates\netbox_contract\contract.html:104
 msgid "Invoice frequency"
 msgstr "付款周期"
+
+#: .\netbox_contract\templates\netbox_contract\contract.html:105
+msgid "months"
+msgstr "个月"
 
 #: .\netbox_contract\templates\netbox_contract\contract.html:133
 #: .\netbox_contract\templates\netbox_contract\invoice.html:18

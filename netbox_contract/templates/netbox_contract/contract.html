@@ -102,7 +102,7 @@
             </tr>
             <tr>
               <th scope="row">{% trans "Invoice frequency" %}</th>
-              <td>{{ object.invoice_frequency }}</td>
+              <td>{{ object.invoice_frequency }} {% trans "months" %}</td>
             </tr>
             {% if not 'parent' in hidden_fields %}
             <tr>
