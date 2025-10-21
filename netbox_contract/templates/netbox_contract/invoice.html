@@ -26,7 +26,7 @@
             </tr>
             <tr>
               <th scope="row">{% trans "Date" %}</th>
-              <td>{{ object.date }}</td>
+              <td>{{ object.date|isodate|placeholder }}</td>
             </tr>
             <tr>
               <th scope="row">{% trans "Status" %}</th>
@@ -35,11 +35,11 @@
             {% if not object.template %}
             <tr>
               <th scope="row">{% trans "Period start" %}</th>
-              <td>{{ object.period_start }}</td>
+              <td>{{ object.period_start|isodate|placeholder }}</td>
             </tr>
             <tr>
               <th scope="row">{% trans "Period end" %}</th>
-              <td>{{ object.period_end }}</td>
+              <td>{{ object.period_end|isodate|placeholder }}</td>
             </tr>
             {% endif %}
             <tr>
