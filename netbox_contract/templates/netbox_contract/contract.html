@@ -108,7 +108,7 @@
             <tr>
               <th scope="row">{% trans "Parent" %}</th>
               <td>
-                <a href="{{ object.parent.get_absolute_url }}">{{ object.parent.name }}</a>
+                <a href="{{ object.parent.get_absolute_url }}">{{ object.parent.name|placeholder }}</a>
               </td>
             </tr>
             {% endif %}
