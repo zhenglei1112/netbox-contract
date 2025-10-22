@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-16 20:41+0800\n"
-"PO-Revision-Date: 2025-10-22 08:05+0800\n"
+"POT-Creation-Date: 2025-10-22 14:17+0800\n"
+"PO-Revision-Date: 2025-10-22 14:18+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh\n"
@@ -254,7 +254,7 @@ msgstr "维度名称"
 
 #: .\netbox_contract\models.py:104
 msgid "Accounting dimension name. Ex: Department, Location, etc."
-msgstr "统计维度名称，例如光纤、管道、机柜、U位等"
+msgstr "统计维度名称，例如光纤、管道、机柜、U位等。"
 
 #: .\netbox_contract\models.py:106
 msgid "value"
@@ -614,3 +614,11 @@ msgstr "服务提供商"
 #: .\netbox_contract\templates\netbox_contract\serviceprovider.html:20
 msgid "Portal url"
 msgstr "门户网站"
+
+#: .\netbox_contract\templates\netbox_contract\serviceprovider.html:41
+msgid "Related Contracts"
+msgstr "外购合同"
+
+#: .\netbox_contract\templates\netbox_contract\serviceprovider.html:46
+msgid "No contracts found"
+msgstr "没有找到外购合同"

@@ -33,4 +33,20 @@
       {% include 'inc/panels/tags.html' %}
     </div>
   </div>
+  
+  {# Contracts section #}
+  <div class="row mb-3">
+    <div class="col col-md-12">
+      <div class="card">
+        <h5 class="card-header">{% trans "Related Contracts" %}</h5>
+        <div class="card-body">
+          {% if contracts_table %}
+            {% include 'inc/table.html' with table=contracts_table %}
+          {% else %}
+            <div class="text-muted">{% trans "No contracts found" %}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock content %}
