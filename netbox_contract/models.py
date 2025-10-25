@@ -306,7 +306,9 @@ class Contract(ContactsMixin, NetBoxModel):
 
     @property
     def notice_date(self):
-        return self.end_date - timedelta(days=self.notice_period)
+        if self.end_date:
+            return self.end_date - timedelta(days=self.notice_period)
+        return None
 
     def __str__(self):
         return self.name

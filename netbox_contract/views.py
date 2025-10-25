@@ -358,7 +358,10 @@ class InvoiceEditView(generic.ObjectEditView):
                 last_invoice = contract.invoices.exclude(template=True).latest(
                     'period_end'
                 )
-                new_period_start = last_invoice.period_end + timedelta(days=1)
+                if last_invoice.period_end:
+                    new_period_start = last_invoice.period_end + timedelta(days=1)
+                else:
+                    new_period_start = None
             except ObjectDoesNotExist:
                 if contract.start_date:
                     new_period_start = contract.start_date
@@ -370,6 +373,12 @@ class InvoiceEditView(generic.ObjectEditView):
                 delta = relativedelta(months=contract.invoice_frequency)
                 new_period_end = new_period_start + delta - timedelta(days=1)
                 initial_data['period_end'] = new_period_end
+            else:
+                # If new_period_start is None, set default values
+                initial_data['period_start'] = date.today()
+                delta = relativedelta(months=contract.invoice_frequency)
+                new_period_end = date.today() + delta - timedelta(days=1)
+                initial_data['period_end'] = new_period_end
 
             if contract.yrc:
                 if contract.invoice_frequency == 12:
@@ -379,7 +388,10 @@ class InvoiceEditView(generic.ObjectEditView):
                         contract.yrc / 12 * contract.invoice_frequency, 2
                     )
             else:
-                initial_data['amount'] = contract.mrc * contract.invoice_frequency
+                if contract.mrc:
+                    initial_data['amount'] = contract.mrc * contract.invoice_frequency
+                else:
+                    initial_data['amount'] = 0
 
             initial_data['currency'] = contract.currency
 
@@ -539,3 +551,286 @@ class AccountingDimensionBulkDeleteView(generic.BulkDeleteView):
     queryset = AccountingDimension.objects.annotate()
     filterset = filtersets.AccountingDimensionFilterSet
     table = tables.AccountingDimensionListTable
+
+
+# Seal reason generation view
+from django.views import View
+from django.http import HttpResponse
+
+class InvoiceGenerateSealReasonView(View):
+    """View to generate seal reason text and copy to clipboard"""
+    
+    def post(self, request):
+        # Get data from form
+        contract_name = request.POST.get('contract_name', '')
+        period_start = request.POST.get('period_start', '')
+        period_end = request.POST.get('period_end', '')
+        amount = request.POST.get('amount', '0')
+        
+        # Generate seal reason text
+        seal_reason = f"{contract_name}{period_start}-{period_end}租金{amount}元"
+        
+        # Return a response with Bootstrap modal
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用印事由已生成</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .modal-backdrop {{
+            background-color: rgba(0, 0, 0, 0.5);
+        }}
+        .seal-reason-text {{
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }}
+        .countdown-btn {{
+            width: 120px;
+        }}
+    </style>
+</head>
+<body>
+    <!-- Bootstrap Modal -->
+    <div class="modal fade show" id="sealReasonModal" tabindex="-1" aria-labelledby="sealReasonModalLabel" aria-hidden="true" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sealReasonModalLabel">用印事由已生成</h5>
+                </div>
+                <div class="modal-body">
+                    <p id="copyStatus">请点击下方按钮复制用印事由：</p>
+                    <div class="seal-reason-text" id="sealReasonText">{seal_reason}</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="copyBtn" onclick="copyToClipboard()">
+                        复制到剪贴板
+                    </button>
+                    <button type="button" class="btn btn-secondary countdown-btn" id="closeBtn" onclick="closeModal()">
+                        关闭 (5)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let countdown = 5;
+        const closeBtn = document.getElementById('closeBtn');
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        
+        function updateCountdown() {{
+            countdown--;
+            if (countdown <= 0) {{
+                clearInterval(countdownInterval);
+                closeModal();
+            }} else {{
+                closeBtn.textContent = '关闭 (' + countdown + ')';
+            }}
+        }}
+        
+        function closeModal() {{
+            clearInterval(countdownInterval);
+            window.history.back();
+        }}
+        
+        // Copy to clipboard function - requires user interaction
+        function copyToClipboard() {{
+            const text = '{seal_reason}';
+            
+            if (navigator.clipboard && window.isSecureContext) {{
+                navigator.clipboard.writeText(text).then(function() {{
+                    document.getElementById('copyStatus').textContent = '以下用印事由已复制到剪切板：';
+                    document.getElementById('copyBtn').textContent = '已复制';
+                    document.getElementById('copyBtn').classList.remove('btn-primary');
+                    document.getElementById('copyBtn').classList.add('btn-success');
+                    document.getElementById('copyBtn').disabled = true;
+                }}).catch(function(err) {{
+                    console.error('Failed to copy text: ', err);
+                    fallbackCopyToClipboard(text);
+                }});
+            }} else {{
+                // Use fallback for older browsers or insecure contexts
+                fallbackCopyToClipboard(text);
+            }}
+        }}
+        
+        function fallbackCopyToClipboard(text) {{
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {{
+                var successful = document.execCommand('copy');
+                if (successful) {{
+                    document.getElementById('copyStatus').textContent = '以下用印事由已复制到剪切板：';
+                    document.getElementById('copyBtn').textContent = '已复制';
+                    document.getElementById('copyBtn').classList.remove('btn-primary');
+                    document.getElementById('copyBtn').classList.add('btn-success');
+                    document.getElementById('copyBtn').disabled = true;
+                }} else {{
+                    document.getElementById('copyStatus').textContent = '生成的用印事由：';
+                }}
+            }} catch (err) {{
+                console.error('Fallback copy failed: ', err);
+                document.getElementById('copyStatus').textContent = '生成的用印事由：';
+            }}
+            document.body.removeChild(textArea);
+        }}
+    </script>
+</body>
+</html>
+"""
+        return HttpResponse(html_content)
+
+
+class InvoiceGenerateEIPSummaryView(View):
+    """View to generate EIP payment summary text and copy to clipboard"""
+    
+    def post(self, request):
+        # Get data from form
+        contract_name = request.POST.get('contract_name', '')
+        period_start = request.POST.get('period_start', '')
+        period_end = request.POST.get('period_end', '')
+        
+        # Generate EIP summary text
+        eip_summary = f"支付{contract_name}，{period_start}-{period_end}"
+        
+        # Return a response with Bootstrap modal
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIP支付摘要已生成</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .modal-backdrop {{
+            background-color: rgba(0, 0, 0, 0.5);
+        }}
+        .seal-reason-text {{
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }}
+        .countdown-btn {{
+            width: 120px;
+        }}
+    </style>
+</head>
+<body>
+    <!-- Bootstrap Modal -->
+    <div class="modal fade show" id="sealReasonModal" tabindex="-1" aria-labelledby="sealReasonModalLabel" aria-hidden="true" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sealReasonModalLabel">EIP支付摘要已生成</h5>
+                </div>
+                <div class="modal-body">
+                    <p id="copyStatus">请点击下方按钮复制EIP支付摘要：</p>
+                    <div class="seal-reason-text" id="sealReasonText">{eip_summary}</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="copyBtn" onclick="copyToClipboard()">
+                        复制到剪贴板
+                    </button>
+                    <button type="button" class="btn btn-secondary countdown-btn" id="closeBtn" onclick="closeModal()">
+                        关闭 (5)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let countdown = 5;
+        const closeBtn = document.getElementById('closeBtn');
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        
+        function updateCountdown() {{
+            countdown--;
+            if (countdown <= 0) {{
+                clearInterval(countdownInterval);
+                closeModal();
+            }} else {{
+                closeBtn.textContent = '关闭 (' + countdown + ')';
+            }}
+        }}
+        
+        function closeModal() {{
+            clearInterval(countdownInterval);
+            window.history.back();
+        }}
+        
+        // Copy to clipboard function - requires user interaction
+        function copyToClipboard() {{
+            const text = '{eip_summary}';
+            
+            if (navigator.clipboard && window.isSecureContext) {{
+                navigator.clipboard.writeText(text).then(function() {{
+                    document.getElementById('copyStatus').textContent = '以下EIP支付摘要已复制到剪切板：';
+                    document.getElementById('copyBtn').textContent = '已复制';
+                    document.getElementById('copyBtn').classList.remove('btn-primary');
+                    document.getElementById('copyBtn').classList.add('btn-success');
+                    document.getElementById('copyBtn').disabled = true;
+                }}).catch(function(err) {{
+                    console.error('Failed to copy text: ', err);
+                    fallbackCopyToClipboard(text);
+                }});
+            }} else {{
+                // Use fallback for older browsers or insecure contexts
+                fallbackCopyToClipboard(text);
+            }}
+        }}
+        
+        function fallbackCopyToClipboard(text) {{
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {{
+                var successful = document.execCommand('copy');
+                if (successful) {{
+                    document.getElementById('copyStatus').textContent = '以下EIP支付摘要已复制到剪切板：';
+                    document.getElementById('copyBtn').textContent = '已复制';
+                    document.getElementById('copyBtn').classList.remove('btn-primary');
+                    document.getElementById('copyBtn').classList.add('btn-success');
+                    document.getElementById('copyBtn').disabled = true;
+                }} else {{
+                    document.getElementById('copyStatus').textContent = '生成的EIP支付摘要：';
+                }}
+            }} catch (err) {{
+                console.error('Fallback copy failed: ', err);
+                document.getElementById('copyStatus').textContent = '生成的EIP支付摘要：';
+            }}
+            document.body.removeChild(textArea);
+        }}
+    </script>
+</body>
+</html>
+"""
+        return HttpResponse(html_content)

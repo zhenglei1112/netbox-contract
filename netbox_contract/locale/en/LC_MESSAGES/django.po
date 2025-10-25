@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-22 14:17+0800\n"
-"PO-Revision-Date: 2025-10-22 14:18+0800\n"
+"POT-Creation-Date: 2025-10-25 16:35+0800\n"
+"PO-Revision-Date: 2025-10-25 16:35+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -70,7 +70,7 @@ msgstr ""
 #: .\netbox_contract\forms.py:732 .\netbox_contract\tables.py:69
 #: .\netbox_contract\tables.py:106 .\netbox_contract\tables.py:133
 #: .\netbox_contract\tables.py:172 .\netbox_contract\tables.py:202
-#: .\netbox_contract\tables.py:272
+#: .\netbox_contract\tables.py:295
 #: .\netbox_contract\templates\netbox_contract\accountingdimension.html:21
 #: .\netbox_contract\templates\netbox_contract\contract.html:36
 #: .\netbox_contract\templates\netbox_contract\invoice.html:32
@@ -144,7 +144,7 @@ msgstr ""
 msgid "Accounting Dimensions"
 msgstr ""
 
-#: .\netbox_contract\forms.py:461 .\netbox_contract\models.py:322
+#: .\netbox_contract\forms.py:461 .\netbox_contract\models.py:324
 msgid "Wether this invoice is a template or not"
 msgstr ""
 
@@ -178,7 +178,7 @@ msgid "Documents"
 msgstr ""
 
 #: .\netbox_contract\forms.py:494 .\netbox_contract\models.py:281
-#: .\netbox_contract\models.py:344
+#: .\netbox_contract\models.py:346
 msgid "URL to the contract documents"
 msgstr ""
 
@@ -262,13 +262,13 @@ msgid "value"
 msgstr ""
 
 #: .\netbox_contract\models.py:111 .\netbox_contract\models.py:227
-#: .\netbox_contract\models.py:328
+#: .\netbox_contract\models.py:330
 msgid "status"
 msgstr ""
 
 #: .\netbox_contract\models.py:113 .\netbox_contract\models.py:139
-#: .\netbox_contract\models.py:283 .\netbox_contract\models.py:346
-#: .\netbox_contract\models.py:387
+#: .\netbox_contract\models.py:283 .\netbox_contract\models.py:348
+#: .\netbox_contract\models.py:389
 msgid "comments"
 msgstr ""
 
@@ -276,7 +276,7 @@ msgstr ""
 msgid "accounting dimension"
 msgstr ""
 
-#: .\netbox_contract\models.py:132 .\netbox_contract\models.py:385
+#: .\netbox_contract\models.py:132 .\netbox_contract\models.py:387
 msgid "accounting dimensions"
 msgstr ""
 
@@ -365,8 +365,8 @@ msgstr ""
 msgid "notice period"
 msgstr ""
 
-#: .\netbox_contract\models.py:254 .\netbox_contract\models.py:338
-#: .\netbox_contract\models.py:381
+#: .\netbox_contract\models.py:254 .\netbox_contract\models.py:340
+#: .\netbox_contract\models.py:383
 msgid "currency"
 msgstr ""
 
@@ -398,7 +398,7 @@ msgstr ""
 msgid "invoice frequency"
 msgstr ""
 
-#: .\netbox_contract\models.py:280 .\netbox_contract\models.py:343
+#: .\netbox_contract\models.py:280 .\netbox_contract\models.py:345
 msgid "documents"
 msgstr ""
 
@@ -406,47 +406,47 @@ msgstr ""
 msgid "parent"
 msgstr ""
 
-#: .\netbox_contract\models.py:305 .\netbox_contract\models.py:331
+#: .\netbox_contract\models.py:305 .\netbox_contract\models.py:333
 msgid "contracts"
 msgstr ""
 
-#: .\netbox_contract\models.py:316
+#: .\netbox_contract\models.py:318
 msgid "number"
 msgstr ""
 
-#: .\netbox_contract\models.py:321
+#: .\netbox_contract\models.py:323
 msgid "template"
 msgstr ""
 
-#: .\netbox_contract\models.py:330
+#: .\netbox_contract\models.py:332
 msgid "date"
 msgstr ""
 
-#: .\netbox_contract\models.py:332
+#: .\netbox_contract\models.py:334
 msgid "period start"
 msgstr ""
 
-#: .\netbox_contract\models.py:333
+#: .\netbox_contract\models.py:335
 msgid "period end"
 msgstr ""
 
-#: .\netbox_contract\models.py:340 .\netbox_contract\models.py:383
+#: .\netbox_contract\models.py:342 .\netbox_contract\models.py:385
 msgid "amount"
 msgstr ""
 
-#: .\netbox_contract\models.py:350 .\netbox_contract\models.py:375
+#: .\netbox_contract\models.py:352 .\netbox_contract\models.py:377
 msgid "invoice"
 msgstr ""
 
-#: .\netbox_contract\models.py:351
+#: .\netbox_contract\models.py:353
 msgid "invoices"
 msgstr ""
 
-#: .\netbox_contract\models.py:391
+#: .\netbox_contract\models.py:393
 msgid "invoice line"
 msgstr ""
 
-#: .\netbox_contract\models.py:392
+#: .\netbox_contract\models.py:394
 msgid "invoice lines"
 msgstr ""
 

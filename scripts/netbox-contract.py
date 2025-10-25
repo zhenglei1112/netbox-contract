@@ -279,7 +279,7 @@ class Check_contract_end(Script):
 
         contracts = Contract.objects.filter(status=StatusChoices.STATUS_ACTIVE)
         for contract in contracts:
-            if contract.end_date is not None:
+            if contract.end_date is not None and contract.notice_date is not None:
                 if contract.notice_date <= date.today() + timedelta(
                     days=days_before_notice
                 ):

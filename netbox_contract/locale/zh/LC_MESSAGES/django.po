@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-22 14:17+0800\n"
-"PO-Revision-Date: 2025-10-22 14:18+0800\n"
+"POT-Creation-Date: 2025-10-25 16:35+0800\n"
+"PO-Revision-Date: 2025-10-25 16:39+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh\n"
@@ -52,7 +52,7 @@ msgstr "上级"
 #: .\netbox_contract\templates\netbox_contract\contract.html:20
 #: .\netbox_contract\templates\netbox_contract\contracttype.html:10
 msgid "Contract type"
-msgstr "合同类型"
+msgstr "合同分类"
 
 #: .\netbox_contract\forms.py:154 .\netbox_contract\forms.py:240
 #: .\netbox_contract\templates\netbox_contract\contract.html:40
@@ -69,7 +69,7 @@ msgstr "内部参与方"
 #: .\netbox_contract\forms.py:732 .\netbox_contract\tables.py:69
 #: .\netbox_contract\tables.py:106 .\netbox_contract\tables.py:133
 #: .\netbox_contract\tables.py:172 .\netbox_contract\tables.py:202
-#: .\netbox_contract\tables.py:272
+#: .\netbox_contract\tables.py:295
 #: .\netbox_contract\templates\netbox_contract\accountingdimension.html:21
 #: .\netbox_contract\templates\netbox_contract\contract.html:36
 #: .\netbox_contract\templates\netbox_contract\invoice.html:32
@@ -102,7 +102,7 @@ msgstr "名称"
 
 #: .\netbox_contract\forms.py:238
 msgid "Contract Type"
-msgstr "合同类型"
+msgstr "合同分类"
 
 #: .\netbox_contract\forms.py:259 .\netbox_contract\forms.py:274
 #: .\netbox_contract\forms.py:284
@@ -143,7 +143,7 @@ msgstr "模版"
 msgid "Accounting Dimensions"
 msgstr "统计维度"
 
-#: .\netbox_contract\forms.py:461 .\netbox_contract\models.py:322
+#: .\netbox_contract\forms.py:461 .\netbox_contract\models.py:324
 msgid "Wether this invoice is a template or not"
 msgstr "此付款是否是一个模板"
 
@@ -177,7 +177,7 @@ msgid "Documents"
 msgstr "文档"
 
 #: .\netbox_contract\forms.py:494 .\netbox_contract\models.py:281
-#: .\netbox_contract\models.py:344
+#: .\netbox_contract\models.py:346
 msgid "URL to the contract documents"
 msgstr "文档链接"
 
@@ -242,11 +242,11 @@ msgstr "颜色"
 
 #: .\netbox_contract\models.py:87 .\netbox_contract\models.py:197
 msgid "contract type"
-msgstr "合同类型"
+msgstr "合同分类"
 
 #: .\netbox_contract\models.py:88
 msgid "contract types"
-msgstr "合同类型"
+msgstr "合同分类"
 
 #: .\netbox_contract\models.py:103
 msgid "dimension name"
@@ -261,13 +261,13 @@ msgid "value"
 msgstr "值"
 
 #: .\netbox_contract\models.py:111 .\netbox_contract\models.py:227
-#: .\netbox_contract\models.py:328
+#: .\netbox_contract\models.py:330
 msgid "status"
 msgstr "状态"
 
 #: .\netbox_contract\models.py:113 .\netbox_contract\models.py:139
-#: .\netbox_contract\models.py:283 .\netbox_contract\models.py:346
-#: .\netbox_contract\models.py:387
+#: .\netbox_contract\models.py:283 .\netbox_contract\models.py:348
+#: .\netbox_contract\models.py:389
 msgid "comments"
 msgstr "评论"
 
@@ -275,7 +275,7 @@ msgstr "评论"
 msgid "accounting dimension"
 msgstr "统计维度"
 
-#: .\netbox_contract\models.py:132 .\netbox_contract\models.py:385
+#: .\netbox_contract\models.py:132 .\netbox_contract\models.py:387
 msgid "accounting dimensions"
 msgstr "统计维度"
 
@@ -364,8 +364,8 @@ msgstr "提前提醒天数，缺省90天"
 msgid "notice period"
 msgstr "提醒天数"
 
-#: .\netbox_contract\models.py:254 .\netbox_contract\models.py:338
-#: .\netbox_contract\models.py:381
+#: .\netbox_contract\models.py:254 .\netbox_contract\models.py:340
+#: .\netbox_contract\models.py:383
 msgid "currency"
 msgstr "货币单位"
 
@@ -397,7 +397,7 @@ msgstr "付款周期，按月计算"
 msgid "invoice frequency"
 msgstr "付款周期"
 
-#: .\netbox_contract\models.py:280 .\netbox_contract\models.py:343
+#: .\netbox_contract\models.py:280 .\netbox_contract\models.py:345
 msgid "documents"
 msgstr "文档"
 
@@ -405,47 +405,47 @@ msgstr "文档"
 msgid "parent"
 msgstr "上级"
 
-#: .\netbox_contract\models.py:305 .\netbox_contract\models.py:331
+#: .\netbox_contract\models.py:305 .\netbox_contract\models.py:333
 msgid "contracts"
 msgstr "外购合同"
 
-#: .\netbox_contract\models.py:316
+#: .\netbox_contract\models.py:318
 msgid "number"
 msgstr "编号"
 
-#: .\netbox_contract\models.py:321
+#: .\netbox_contract\models.py:323
 msgid "template"
 msgstr "模版"
 
-#: .\netbox_contract\models.py:330
+#: .\netbox_contract\models.py:332
 msgid "date"
 msgstr "日期"
 
-#: .\netbox_contract\models.py:332
+#: .\netbox_contract\models.py:334
 msgid "period start"
 msgstr "起始日期"
 
-#: .\netbox_contract\models.py:333
+#: .\netbox_contract\models.py:335
 msgid "period end"
 msgstr "结束日期"
 
-#: .\netbox_contract\models.py:340 .\netbox_contract\models.py:383
+#: .\netbox_contract\models.py:342 .\netbox_contract\models.py:385
 msgid "amount"
 msgstr "金额"
 
-#: .\netbox_contract\models.py:350 .\netbox_contract\models.py:375
+#: .\netbox_contract\models.py:352 .\netbox_contract\models.py:377
 msgid "invoice"
 msgstr "付款"
 
-#: .\netbox_contract\models.py:351
+#: .\netbox_contract\models.py:353
 msgid "invoices"
 msgstr "付款"
 
-#: .\netbox_contract\models.py:391
+#: .\netbox_contract\models.py:393
 msgid "invoice line"
 msgstr "付款明细"
 
-#: .\netbox_contract\models.py:392
+#: .\netbox_contract\models.py:394
 msgid "invoice lines"
 msgstr "付款明细"
 
@@ -622,3 +622,15 @@ msgstr "外购合同"
 #: .\netbox_contract\templates\netbox_contract\serviceprovider.html:46
 msgid "No contracts found"
 msgstr "没有找到外购合同"
+
+#~ msgid "Seal Reason"
+#~ msgstr "用印事由"
+
+#~ msgid "用印事由"
+#~ msgstr "用印事由"
+
+#~ msgid "以下用印事由已复制到剪切板："
+#~ msgstr "以下用印事由已复制到剪切板："
+
+#~ msgid "生成的用印事由："
+#~ msgstr "生成的用印事由："

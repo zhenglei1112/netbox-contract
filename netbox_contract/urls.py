@@ -312,4 +312,15 @@ urlpatterns = (
         name='contracttype_changelog',
         kwargs={'model': models.ContractType},
     ),
+    # Seal reason generation
+    path(
+        'invoices/generate-seal-reason/',
+        views.InvoiceGenerateSealReasonView.as_view(),
+        name='invoice_generate_seal_reason',
+    ),
+    path(
+        'invoices/generate-eip-summary/',
+        views.InvoiceGenerateEIPSummaryView.as_view(),
+        name='invoice_generate_eip_summary',
+    ),
 )

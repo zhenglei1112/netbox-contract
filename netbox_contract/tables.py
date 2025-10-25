@@ -202,6 +202,29 @@ class InvoiceListTable(NetBoxTable):
         verbose_name=_('Status'),
     )
     tags = columns.TagColumn(url_name='plugins:netbox_contract:invoiceline_list')
+    actions = columns.ActionsColumn(
+        extra_buttons="""
+            <form method="post" action="{% url 'plugins:netbox_contract:invoice_generate_seal_reason' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="contract_name" value="{{ record.contracts.all.0.name|default:'' }}">
+                <input type="hidden" name="period_start" value="{{ record.period_start|date:'Y-m-d'|default:'' }}">
+                <input type="hidden" name="period_end" value="{{ record.period_end|date:'Y-m-d'|default:'' }}">
+                <input type="hidden" name="amount" value="{{ record.amount|default:0 }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary" title="用印事由">
+                    <i class="mdi mdi-stamper"></i>
+                </button>
+            </form>
+            <form method="post" action="{% url 'plugins:netbox_contract:invoice_generate_eip_summary' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="contract_name" value="{{ record.contracts.all.0.name|default:'' }}">
+                <input type="hidden" name="period_start" value="{{ record.period_start|date:'Y-m-d'|default:'' }}">
+                <input type="hidden" name="period_end" value="{{ record.period_end|date:'Y-m-d'|default:'' }}">
+                <button type="submit" class="btn btn-sm btn-outline-info" title="EIP支付摘要">
+                    <i class="mdi mdi-file-document"></i>
+                </button>
+            </form>
+        """
+    )
 
     class Meta(NetBoxTable.Meta):
         model = Invoice
