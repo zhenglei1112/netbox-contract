@@ -568,7 +568,7 @@ class InvoiceGenerateSealReasonView(View):
         amount = request.POST.get('amount', '0')
         
         # Generate seal reason text
-        seal_reason = f"{contract_name}{period_start}-{period_end}租金{amount}元"
+        seal_reason = f"{contract_name}，{period_start}-{period_end}租金{amount}元"
         
         # Return a response with Bootstrap modal
         html_content = f"""
