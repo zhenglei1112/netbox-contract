@@ -27,9 +27,6 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
     currency = django_filters.MultipleChoiceFilter(
         choices=CurrencyChoices, null_value=None
     )
-    contract_type = django_filters.ModelMultipleChoiceFilter(
-        field_name='contract_type__name', to_field_name='name', queryset=ContractType.objects.all()
-    )
 
     class Meta:
         model = Contract

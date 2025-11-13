@@ -306,6 +306,14 @@ class InvoiceForm(NetBoxModelForm):
         label=_('Contracts'),
     )
 
+    amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+        label=_('periodic Amount'),
+        help_text=_('一个付款周期的总金额'),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -487,6 +495,7 @@ class InvoiceBulkEditForm(NetBoxModelBulkEditForm):
         decimal_places=2,
         required=False,
         label=_('Amount'),
+        help_text=_('付款周期的总金额'),
     )
     documents = forms.URLField(
         required=False,
@@ -612,6 +621,14 @@ class InvoiceLineForm(NetBoxModelForm):
         required=False,
         selector=True,
         label=_('Accounting dimensions'),
+    )
+
+    amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+        label=_('periodic line Amount'),
+        help_text=_('此付款明细项在一个付款周期的金额'),
     )
 
     def clean(self):
