@@ -22,7 +22,13 @@
           <table class="table table-hover attr-table">
             <tr>
               <th scope="row">{% trans "Number" %}</th>
-              <td>{{ object.number }}</td>
+              <td title="{{ object.number }}">
+                {% if object.number|length > 40 %}
+                  {{ object.number|slice:":13" }}...{{ object.number|slice:"-23:" }}
+                {% else %}
+                  {{ object.number }}
+                {% endif %}
+              </td>
             </tr>
             <tr>
               <th scope="row">{% trans "Date" %}</th>

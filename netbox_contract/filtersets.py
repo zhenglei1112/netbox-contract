@@ -1,5 +1,6 @@
 import django_filters
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from netbox.filtersets import NetBoxModelFilterSet
 from tenancy.filtersets import ContactModelFilterSet, TenancyFilterSet
 
@@ -27,6 +28,11 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
     currency = django_filters.MultipleChoiceFilter(
         choices=CurrencyChoices, null_value=None
     )
+    external_party_object = django_filters.ModelChoiceFilter(
+        queryset=ServiceProvider.objects.all(),
+        method='filter_external_party_object',
+        label=_('External party')
+    )
 
     class Meta:
         model = Contract
@@ -48,6 +54,24 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
             | Q(comments__icontains=value),
 #            Q(status__iexact='Active'),
         )
+
+    def filter_external_party_object(self, queryset, name, value):
+        """
+        根据外部参与方筛选合同
+        """
+        if not value:
+            return queryset
+        
+        # 获取外部参与方的ContentType
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(value)
+        
+        # 筛选匹配的合同
+        return queryset.filter(
+            external_party_object_type=content_type,
+            external_party_object_id=value.id
+        )
+
 
 
 class InvoiceFilterSet(NetBoxModelFilterSet):

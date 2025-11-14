@@ -155,6 +155,12 @@ class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelF
     internal_party = forms.ChoiceField(choices=InternalEntityChoices, required=False, label=_('Internal party'))
     status = forms.ChoiceField(choices=StatusChoices, required=False, label=_('Status'))
     currency = forms.ChoiceField(choices=CurrencyChoices, required=False, label=_('Currency'))
+    external_party_object = DynamicModelChoiceField(
+        queryset=ServiceProvider.objects.all(),
+        required=False,
+        selector=True,
+        label=_('External party'),
+    )
     parent = DynamicModelChoiceField(
         queryset=Contract.objects.all(),
         required=False,
@@ -162,6 +168,7 @@ class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelF
         label=_('Parent'),
     )
     tag = TagFilterField(model)
+
 
 
 class ContractCSVForm(NetBoxModelImportForm):

@@ -148,7 +148,13 @@
           <tr>
             <th scope="row">{% trans "Number" %}</th>
             <td>
-              <a href="{{ invoice_template.get_absolute_url }}">{{  invoice_template.number }}</a>
+              <a href="{{ invoice_template.get_absolute_url }}" title="{{ invoice_template.number }}">
+                {% if invoice_template.number|length > 40 %}
+                  {{ invoice_template.number|slice:":13" }}...{{ invoice_template.number|slice:"-23:" }}
+                {% else %}
+                  {{ invoice_template.number }}
+                {% endif %}
+              </a>
             </td>
           </tr>
           <tr>
