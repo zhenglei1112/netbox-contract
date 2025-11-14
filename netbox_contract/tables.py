@@ -133,7 +133,7 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
         verbose_name=_('Status'),
     )
     tags = columns.TagColumn(url_name='plugins:netbox_contract:contract_list')
-    contract_type = tables.Column(linkify=True, verbose_name=_('Contract type'))
+    contract_type = columns.ColoredLabelColumn(verbose_name=_('Contract type'))
 
     class Meta(NetBoxTable.Meta):
         model = Contract
