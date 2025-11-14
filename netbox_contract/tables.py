@@ -1,6 +1,7 @@
 import django_tables2 as tables
 
 from django.utils.translation import gettext_lazy as _
+from django.utils.html import format_html
 from netbox.tables import NetBoxTable, columns
 from tenancy.tables import ContactsColumnMixin
 
@@ -13,6 +14,29 @@ from .models import (
     InvoiceLine,
     ServiceProvider,
 )
+
+
+class TruncatedNameColumn(tables.Column):
+    """
+    自定义列类，用于处理长名称的截断和鼠标提示
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs = {
+            'td': {
+                'title': lambda record: getattr(record, 'name', '') if hasattr(record, 'name') else ''
+            }
+        }
+
+    def render(self, value):
+        if value and len(value) > 50:
+            # 保留前23个字符和后23个字符，中间用...表示
+            return format_html(
+                '{}...{}',
+                value[:23],
+                value[-23:]
+            )
+        return value
 
 
 class ContractTypeListTable(NetBoxTable):
@@ -125,7 +149,7 @@ class ContractAssignmentContractTable(NetBoxTable):
 
 
 class ContractListTable(ContactsColumnMixin, NetBoxTable):
-    name = tables.Column(linkify=True)
+    name = TruncatedNameColumn(linkify=True)
     external_party_object = tables.Column(verbose_name=_('External party'), linkify=True)
     parent = tables.Column(linkify=True)
     yrc = tables.Column(verbose_name=_('Yerly recuring costs'))
@@ -166,7 +190,7 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
 
 
 class ContractListBottomTable(NetBoxTable):
-    name = tables.Column(linkify=True)
+    name = TruncatedNameColumn(linkify=True)
     external_party_object = tables.Column(linkify=True, verbose_name=_('External party'))
     status = columns.ChoiceFieldColumn(
         verbose_name=_('Status'),
