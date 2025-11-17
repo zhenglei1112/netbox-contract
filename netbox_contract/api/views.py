@@ -34,6 +34,7 @@ class InvoiceViewSet(NetBoxModelViewSet):
 class ServiceProviderViewSet(NetBoxModelViewSet):
     queryset = models.ServiceProvider.objects.prefetch_related('tags')
     serializer_class = ServiceProviderSerializer
+    filterset_class = filtersets.ServiceProviderFilterSet
 
 
 class ContractAssignmentViewSet(NetBoxModelViewSet):

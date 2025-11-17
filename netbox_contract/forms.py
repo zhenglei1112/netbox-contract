@@ -159,6 +159,9 @@ class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelF
         queryset=ServiceProvider.objects.all(),
         required=False,
         selector=True,
+        query_params={
+            'q': '$q'
+        },
         label=_('External party'),
     )
     parent = DynamicModelChoiceField(
