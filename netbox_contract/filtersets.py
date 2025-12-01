@@ -1,4 +1,5 @@
 import django_filters
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from netbox.filtersets import NetBoxModelFilterSet
@@ -33,6 +34,10 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
         method='filter_external_party_object',
         label=_('External party')
     )
+    compliance_manager = django_filters.ModelChoiceFilter(
+        queryset=get_user_model().objects.all(),
+        label=_('Compliance Manager')
+    )
 
     class Meta:
         model = Contract
@@ -45,6 +50,7 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
             'end_date',
             'initial_term',
             'parent',
+            'compliance_manager',
         )
 
     def search(self, queryset, name, value):

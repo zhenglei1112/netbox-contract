@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_serializer_method
@@ -16,6 +17,8 @@ from ..models import (
     InvoiceLine,
     ServiceProvider,
 )
+
+User = get_user_model()
 
 
 class NestedContractSerializer(WritableNestedSerializer):
@@ -116,6 +119,11 @@ class ContractSerializer(NetBoxModelSerializer):
     tenant = TenantSerializer(nested=True, required=False, allow_null=True)
     external_party_object_type = ContentTypeField(queryset=ContentType.objects.all())
     external_party_object = serializers.SerializerMethodField(read_only=True)
+    compliance_manager = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = Contract
@@ -142,6 +150,7 @@ class ContractSerializer(NetBoxModelSerializer):
             'nrc',
             'invoice_frequency',
             'comments',
+            'compliance_manager',
             'parent',
             'tags',
             'custom_fields',
@@ -171,6 +180,7 @@ class ContractSerializer(NetBoxModelSerializer):
             'nrc',
             'invoice_frequency',
             'comments',
+            'compliance_manager',
             'parent',
         )
 

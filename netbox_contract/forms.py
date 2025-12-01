@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -44,6 +45,7 @@ from .models import (
 )
 
 plugin_settings = settings.PLUGINS_CONFIG['netbox_contract']
+User = get_user_model()
 
 
 # Contract
@@ -68,6 +70,13 @@ class ContractForm(NetBoxModelForm):
     )
     contract_type = DynamicModelChoiceField(
         queryset=ContractType.objects.all(), required=False, selector=True, label=_('Contract type')
+    )
+    compliance_manager = DynamicModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        selector=True,
+        label=_('Compliance Manager'),
+        help_text=_('compliance manager'),
     )
 
     def __init__(self, *args, **kwargs):
@@ -124,6 +133,7 @@ class ContractForm(NetBoxModelForm):
             'mrc',
             'nrc',
             'invoice_frequency',
+            'compliance_manager',
             'parent',
             'documents',
             'comments',
@@ -169,6 +179,12 @@ class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelF
         required=False,
         selector=True,
         label=_('Parent'),
+    )
+    compliance_manager = DynamicModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        selector=True,
+        label=_('Compliance Manager'),
     )
     tag = TagFilterField(model)
 

@@ -4,7 +4,7 @@ from utilities.urls import get_model_urls
 
 from . import models, views
 
-urlpatterns = (
+urlpatterns = [
     # Service Providers
     path(
         'serviceproviders/',
@@ -323,4 +323,4 @@ urlpatterns = (
         views.InvoiceGenerateEIPSummaryView.as_view(),
         name='invoice_generate_eip_summary',
     ),
-)
+]

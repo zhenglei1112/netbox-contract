@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -13,6 +15,8 @@ from netbox.models.features import ContactsMixin
 from utilities.choices import ChoiceSet
 from utilities.fields import ColorField
 from virtualization.choices import VirtualMachineStatusChoices
+
+User = get_user_model()
 
 
 class StatusChoices(ChoiceSet):
@@ -281,6 +285,15 @@ class Contract(ContactsMixin, NetBoxModel):
         help_text=_('URL to the contract documents'),
     )
     comments = models.TextField(blank=True, verbose_name=_('comments'))
+    compliance_manager = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='compliance_managed_contracts',
+        null=True,
+        blank=True,
+        verbose_name=_('Compliance Manager'),
+        help_text=_('compliance manager'),
+    )
     parent = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,

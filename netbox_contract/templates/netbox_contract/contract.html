@@ -116,6 +116,16 @@
               <th scope="row">{% trans "Invoice frequency" %}</th>
               <td>{{ object.invoice_frequency }} {% trans "months" %}</td>
             </tr>
+            <tr>
+              <th scope="row">{% trans "Compliance Manager" %}</th>
+              <td>
+                {% if object.compliance_manager %}
+                  <a href="{{ object.compliance_manager.get_absolute_url }}">{{ object.compliance_manager }}</a>
+                {% else %}
+                  {{ ''|placeholder }}
+                {% endif %}
+              </td>
+            </tr>
             {% if not 'parent' in hidden_fields %}
             <tr>
               <th scope="row">{% trans "Parent" %}</th>

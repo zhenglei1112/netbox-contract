@@ -158,6 +158,10 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
     )
     tags = columns.TagColumn(url_name='plugins:netbox_contract:contract_list')
     contract_type = columns.ColoredLabelColumn(verbose_name=_('Contract type'))
+    compliance_manager = tables.Column(
+        verbose_name=_('Compliance Manager'),
+        linkify=True
+    )
 
     class Meta(NetBoxTable.Meta):
         model = Contract
@@ -185,6 +189,7 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'comments',
             'parent',
             'actions',
+            'compliance_manager',
         )
         default_columns = ('name', 'status', 'contract_type', 'parent')
 

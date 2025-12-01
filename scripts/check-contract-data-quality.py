@@ -2,6 +2,12 @@ from extras.scripts import Script
 from netbox_contract.models import Contract, ContractType, Invoice, InvoiceLine
 from django.contrib.auth import get_user_model
 from collections import defaultdict
+from extras.models import Notification
+from django.contrib.contenttypes.models import ContentType
+try:
+    from core.models import Job
+except ImportError:
+    from extras.models import Job
 
 # 获取Netbox使用的用户模型
 User = get_user_model()
@@ -42,6 +48,7 @@ class check_contract_data_quality(Script):
         # 检查每个合同
         for contract in contracts:
             contract_issues = []
+            contract_custom_data = contract.custom_field_data
             
             # 1. 检查合同是否具有付款模板
             has_template_invoice = Invoice.objects.filter(
@@ -75,7 +82,12 @@ class check_contract_data_quality(Script):
                 for invoice in template_invoices:
                     invoice_lines = invoice.invoicelines.all()
                     
+                    # 收集该发票所有明细的统计维度
+                    invoice_dimensions = set()
                     for line in invoice_lines:
+                        for d in line.accounting_dimensions.all():
+                            invoice_dimensions.add(d.name)
+
                         line_custom_data = line.custom_field_data
                         
                         # 4. 检查付款模板明细中，自定义字段未全部填写
@@ -89,7 +101,7 @@ class check_contract_data_quality(Script):
                         if quantity is None or quantity == '':
                             missing_fields.append('数量')
                         if monthly_subtotal is None or monthly_subtotal == '':
-                            missing_fields.append('月小计'
+                            missing_fields.append('月小计')
                         
                         if missing_fields:
                             contract_issues.append(f'4. 付款模板明细中，字段未填写: {", ".join(missing_fields)}')
@@ -107,9 +119,10 @@ class check_contract_data_quality(Script):
                                 
                                 calculated_subtotal = unitprice_float * quantity_float
                                 
-                                # 允许1以内的误差
-                                if abs(calculated_subtotal - monthly_subtotal_float) > 1:
-                                    contract_issues.append(f'5. 付款模板明细计算错误: 月单价({unitprice}) * 数量({quantity}) = {calculated_subtotal:.2f} ≠ 月小计({monthly_subtotal})')
+                                # 允许误差为2
+                                tolerance = 2
+                                if abs(calculated_subtotal - monthly_subtotal_float) > tolerance:
+                                    contract_issues.append(f'5. 付款模板明细计算错误: 月单价({unitprice}) * 数量({quantity}) = {calculated_subtotal:.2f} ≠ 月小计({monthly_subtotal}) (允许误差: {tolerance:.4f})')
                                     issue_stats['明细计算错误'] += 1
                                 
                             except (ValueError, TypeError):
@@ -129,8 +142,11 @@ class check_contract_data_quality(Script):
                                 if line_amount is not None and line_amount != '':
                                     try:
                                         line_amount_float = float(line_amount)
-                                        if abs(line_amount_float - expected_amount) > 1:
-                                            contract_issues.append(f'6. 付款模板明细金额错误: 月小计({monthly_subtotal}) * 付款周期({payment_frequency}) = {expected_amount:.2f} ≠ 模板明细付款周期小计金额({line_amount})')
+                                        
+                                        # 允许误差为2
+                                        tolerance = 2
+                                        if abs(line_amount_float - expected_amount) > tolerance:
+                                            contract_issues.append(f'6. 付款模板明细金额错误: 月小计({monthly_subtotal}) * 付款周期({payment_frequency}) = {expected_amount:.2f} ≠ 模板明细付款周期小计金额({line_amount}) (允许误差: {tolerance:.4f})')
                                             issue_stats['明细金额错误'] += 1
                                     except (ValueError, TypeError):
                                         contract_issues.append('6. 付款模板明细金额字段格式错误')
@@ -139,13 +155,40 @@ class check_contract_data_quality(Script):
                             except (ValueError, TypeError):
                                 contract_issues.append('6. 月小计字段格式错误，无法计算')
                                 issue_stats['月小计格式错误'] += 1
+
+                    # 7. 检查合同采购品目与付款模板明细项不一致 (针对整个发票检查)
+                    contract_procurement_item = contract_custom_data.get('ProcurementItem')
+                    
+                    # 采购品目与统计维度映射关系
+                    procurement_mapping = {
+                        '管道租赁': '管道',
+                        '光纤租赁': '纤芯',
+                        '机房租赁': '机房',
+                        '机柜租赁': '机柜',
+                        '机位租赁': '机位',
+                        '电路租赁': '带宽'
+                    }
+                    
+                    # 统一处理为列表
+                    items_to_check = []
+                    if isinstance(contract_procurement_item, list):
+                        items_to_check = contract_procurement_item
+                    elif contract_procurement_item:
+                        items_to_check = [contract_procurement_item]
+                        
+                    for item in items_to_check:
+                        if item in procurement_mapping:
+                            expected_dimension_name = procurement_mapping[item]
+                            
+                            if expected_dimension_name not in invoice_dimensions:
+                                contract_issues.append(f'7. 采购品目不匹配: 合同包含"{item}"，但该合同的付款模板中未包含"{expected_dimension_name}"统计维度的明细项 (当前所有维度: {", ".join(invoice_dimensions) or "无"})')
+                                issue_stats['采购品目不匹配'] += 1
             
             # 如果合同有问题，记录到输出
             if contract_issues:
                 contracts_with_issues.append(contract)
                 
                 # 获取履约主管信息
-                contract_custom_data = contract.custom_field_data
                 compliance_manager_id = contract_custom_data.get('ComplianceManager', None)
                 compliance_manager_name = '未指定履约主管'
                 
@@ -199,6 +242,7 @@ class check_contract_data_quality(Script):
                         output.append(f'  {issue}')
                     output.append('')
                 
+
                 output.append('')
         
         return '\n'.join(output)
