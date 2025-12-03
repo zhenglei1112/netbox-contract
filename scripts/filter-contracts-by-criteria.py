@@ -1,10 +1,3 @@
-from extras.scripts import Script, IntegerVar
-from netbox_contract.models import Contract, ContractType, Invoice, InvoiceLine, AccountingDimension
-from collections import defaultdict
-from datetime import date, timedelta
-
-name = '合同筛选脚本'
-
 class filter_contracts_by_criteria(Script):
     class Meta:
         name = '筛选符合条件的合同并进行分组统计'
@@ -256,8 +249,8 @@ class filter_contracts_by_criteria(Script):
         """处理发票明细项"""
         # 获取自定义字段数据
         custom_data = line.custom_field_data
-        quantity = custom_data.get('quantity', 0)
-        monthly_subtotal = custom_data.get('MonthlySubtotal', 0)
+        quantity = custom_data.get('quantity') or 0
+        monthly_subtotal = custom_data.get('MonthlySubtotal') or 0
         
         # 计算月度小计累计值
         monthly_subtotal_accumulated = self.calculate_monthly_subtotal_accumulated(
@@ -303,7 +296,7 @@ class filter_contracts_by_criteria(Script):
 
     def calculate_months_diff(self, end_date, start_date):
         """计算两个日期之间的月数（向上取整）"""
-        days_diff = (end_date - start_date).days
+        days_diff = (end_date - start_date).days 
         if days_diff > 0:
             months_diff = (days_diff + 29) // 30  # 向上取整
         else:
