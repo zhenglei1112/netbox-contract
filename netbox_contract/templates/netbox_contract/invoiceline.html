@@ -24,10 +24,12 @@
               <th scope="row">{% trans "Amount" %}</th>
               <td>{{ object.amount }}</td>
             </tr>
+            <!-- 隐藏货币单位
             <tr>
               <th scope="row">{% trans "Currency" %}</th>
               <td>{{ object.get_currency_display  }}</td>
             </tr>
+            -->
             <tr>
               <th scope="row">{% trans "Accounting dimensions" %}</th>
               <td>{{ object.accounting_dimensions }}</td>

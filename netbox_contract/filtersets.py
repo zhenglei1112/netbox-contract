@@ -26,9 +26,6 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
     internal_party = django_filters.MultipleChoiceFilter(
         choices=InternalEntityChoices, null_value=None
     )
-    currency = django_filters.MultipleChoiceFilter(
-        choices=CurrencyChoices, null_value=None
-    )
     external_party_object = django_filters.ModelChoiceFilter(
         queryset=ServiceProvider.objects.all(),
         method='filter_external_party_object',
@@ -82,9 +79,6 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
 
 class InvoiceFilterSet(NetBoxModelFilterSet):
     status = django_filters.MultipleChoiceFilter(choices=InvoiceStatusChoices, null_value=None)
-    currency = django_filters.MultipleChoiceFilter(
-        choices=CurrencyChoices, null_value=None
-    )
     accounting_dimensions = django_filters.ModelChoiceFilter(
         field_name='invoicelines__accounting_dimensions',
         queryset=AccountingDimension.objects.all(),
@@ -138,10 +132,6 @@ class ContractAssignmentFilterSet(NetBoxModelFilterSet):
 
 
 class InvoiceLineFilterSet(NetBoxModelFilterSet):
-    currency = django_filters.MultipleChoiceFilter(
-        choices=CurrencyChoices, null_value=None
-    )
-
     class Meta:
         model = InvoiceLine
         fields = ('id', 'invoice', 'accounting_dimensions')

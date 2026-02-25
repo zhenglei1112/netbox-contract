@@ -103,13 +103,13 @@ class ContractTestCase(ModelViewTestCase, ViewTestCases.PrimaryObjectViewTestCas
 
         cls.csv_data = (
             'name,contract_type,external_party_object_type,external_party_object_id,internal_party,'
-            'tenant,status,start_date,end_date,currency,mrc,nrc,invoice_frequency',
+            'tenant,status,start_date,end_date,mrc,nrc,invoice_frequency',
             'Contract 4,Contract Type A,netbox_contract.serviceprovider,Service Provider A,entity1,'
-            'Tenant 1,active,2025-01-01,2025-12-31,usd,100,1000,1',
+            'Tenant 1,active,2025-01-01,2025-12-31,100,1000,1',
             'Contract 5,Contract Type A,netbox_contract.serviceprovider,Service Provider A,entity1,'
-            'Tenant 1,active,2025-01-01,2025-12-31,usd,100,1000,1',
+            'Tenant 1,active,2025-01-01,2025-12-31,100,1000,1',
             'Contract 6,Contract Type A,netbox_contract.serviceprovider,Service Provider A,entity1,'
-            'Tenant 1,active,2025-01-01,2025-12-31,usd,100,1000,1'
+            'Tenant 1,active,2025-01-01,2025-12-31,100,1000,1'
         )
 
         cls.csv_update_data = (
@@ -180,10 +180,10 @@ class InvoiceTestCase(ModelViewTestCase, ViewTestCases.PrimaryObjectViewTestCase
         }
 
         cls.csv_data = (
-            'number,contracts,status,currency,amount,date,template,period_start,period_end',
-            'invoice4,Contract1,posted,usd,100,2025-04-25,False,2025-04-01,2025-04-30',
-            'invoice5,Contract1,posted,usd,100,2025-05-25,False,2025-05-01,2025-05-31',
-            'invoice6,Contract1,posted,usd,100,2025-06-25,False,2025-06-01,2025-06-30',
+            'number,contracts,status,amount,date,template,period_start,period_end',
+            'invoice4,Contract1,posted,100,2025-04-25,False,2025-04-01,2025-04-30',
+            'invoice5,Contract1,posted,100,2025-05-25,False,2025-05-01,2025-05-31',
+            'invoice6,Contract1,posted,100,2025-06-25,False,2025-06-01,2025-06-30',
         )
 
         cls.csv_update_data = (
@@ -235,9 +235,9 @@ class InvoiceLineTestCase(ModelViewTestCase, ViewTestCases.PrimaryObjectViewTest
         }
 
         cls.csv_data = (
-            'invoice,currency,amount',
-            'Invoice3,usd,50',
-            'Invoice3,usd,50'
+            'invoice,amount',
+            'Invoice3,50',
+            'Invoice3,50'
         )
 
         cls.csv_update_data = (

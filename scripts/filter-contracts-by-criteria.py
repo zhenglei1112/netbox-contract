@@ -1,3 +1,9 @@
+from extras.scripts import Script, IntegerVar
+from netbox_contract.models import Contract, ContractType, Invoice, InvoiceLine, AccountingDimension
+from collections import defaultdict
+from datetime import date, timedelta
+
+name = '合同筛选脚本'
 class filter_contracts_by_criteria(Script):
     class Meta:
         name = '筛选符合条件的合同并进行分组统计'

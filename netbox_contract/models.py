@@ -310,7 +310,7 @@ class Contract(ContactsMixin, NetBoxModel):
         return StatusChoices.colors.get(self.status)
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('-created',)
         indexes = [
             models.Index(fields=['external_party_object_type', 'external_party_object_id']),
         ]

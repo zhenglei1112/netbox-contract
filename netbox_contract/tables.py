@@ -180,7 +180,6 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'end_date',
             'initial_term',
             'renewal_term',
-            'currency',
             'mrc',
             'yrc',
             'nrc',
@@ -266,7 +265,6 @@ class InvoiceListTable(NetBoxTable):
             'contracts',
             'period_start',
             'period_end',
-            'currency',
             'amount',
             'documents',
             'comments',
@@ -304,7 +302,6 @@ class InvoiceLineListTable(NetBoxTable):
             'pk',
             'invoice',
             'amount',
-            'currency',
             'accounting_dimensions',
             'comments',
         )
@@ -312,7 +309,6 @@ class InvoiceLineListTable(NetBoxTable):
             'pk',
             'invoice',
             'amount',
-            'currency',
             'accounting_dimensions',
             'comments',
         )

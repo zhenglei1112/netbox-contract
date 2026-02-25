@@ -48,10 +48,12 @@
               <td>{{ object.period_end|isodate|placeholder }}</td>
             </tr>
             {% endif %}
+            <!-- 隐藏货币单位
             <tr>
               <th scope="row">{% trans "Currency" %}</th>
               <td>{{ object.get_currency_display  }}</td>
             </tr>
+            -->
             <tr>
               <th scope="row">{% trans "frequency Amount" %}</th>
               <td>{{ object.amount }}</td>

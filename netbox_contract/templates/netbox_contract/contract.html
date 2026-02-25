@@ -90,10 +90,12 @@
             </tr>
             {% endif %}
             -->
+            <!-- 隐藏货币单位
             <tr>
               <th scope="row">{% trans "Currency" %}</th>
               <td>{{ object.get_currency_display  }}</td>
             </tr>
+            -->
             <tr>
               <th scope="row">{% trans "Monthly recuring costs" %}</th>
               <td>{{ object.mrc|placeholder }}</td>
@@ -167,10 +169,12 @@
               </a>
             </td>
           </tr>
+          <!-- 隐藏货币单位
           <tr>
             <th scope="row">{% trans "Currency" %}</th>
             <td>{{ invoice_template.get_currency_display  }}</td>
           </tr>
+          -->
           <tr>
             <th scope="row">{% trans "Total amount" %}</th>
             <td>{{ invoice_template.total_invoicelines_amount }}</td>

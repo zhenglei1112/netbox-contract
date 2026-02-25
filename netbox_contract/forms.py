@@ -106,10 +106,11 @@ class ContractForm(NetBoxModelForm):
         # Initialise fields settings
         mandatory_fields = plugin_settings.get('mandatory_contract_fields')
         for field in mandatory_fields:
-            self.fields[field].required = True
+            if field in self.fields:
+                self.fields[field].required = True
         hidden_fields = plugin_settings.get('hidden_contract_fields')
         for field in hidden_fields:
-            if not self.fields[field].required:
+            if field in self.fields and not self.fields[field].required:
                 self.fields[field].widget = forms.HiddenInput()
 
     class Meta:
@@ -128,7 +129,6 @@ class ContractForm(NetBoxModelForm):
             'initial_term',
             'renewal_term',
             'notice_period',
-            'currency',
             'yrc',
             'mrc',
             'nrc',
@@ -164,7 +164,6 @@ class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelF
     external_reference = forms.CharField(required=False, label=_('External reference'))
     internal_party = forms.ChoiceField(choices=InternalEntityChoices, required=False, label=_('Internal party'))
     status = forms.ChoiceField(choices=StatusChoices, required=False, label=_('Status'))
-    currency = forms.ChoiceField(choices=CurrencyChoices, required=False, label=_('Currency'))
     external_party_object = DynamicModelChoiceField(
         queryset=ServiceProvider.objects.all(),
         required=False,
@@ -237,7 +236,6 @@ class ContractCSVForm(NetBoxModelImportForm):
             'end_date',
             'initial_term',
             'renewal_term',
-            'currency',
             'yrc',
             'mrc',
             'nrc',
@@ -346,10 +344,11 @@ class InvoiceForm(NetBoxModelForm):
         # Initialise fields settings
         mandatory_fields = plugin_settings.get('mandatory_invoice_fields')
         for field in mandatory_fields:
-            self.fields[field].required = True
+            if field in self.fields:
+                self.fields[field].required = True
         hidden_fields = plugin_settings.get('hidden_invoice_fields')
         for field in hidden_fields:
-            if not self.fields[field].required:
+            if field in self.fields and not self.fields[field].required:
                 self.fields[field].widget = forms.HiddenInput()
 
     def clean(self):
@@ -418,7 +417,6 @@ class InvoiceForm(NetBoxModelForm):
             'status',
             'period_start',
             'period_end',
-            'currency',
             'amount',
             'documents',
             'comments',
@@ -443,7 +441,6 @@ class InvoiceFilterForm(NetBoxModelFilterSetForm):
         label=_('Template'),
     )
     status = forms.ChoiceField(choices=InvoiceStatusChoices, required=False, label=_('Status'))
-    currency = forms.ChoiceField(choices=CurrencyChoices, required=False, label=_('Currency'))
     contracts = DynamicModelMultipleChoiceField(
         queryset=Contract.objects.all(),
         required=False,
@@ -479,7 +476,6 @@ class InvoiceCSVForm(NetBoxModelImportForm):
             'status',
             'period_start',
             'period_end',
-            'currency',
             'amount',
             'documents',
             'comments',
@@ -510,11 +506,6 @@ class InvoiceBulkEditForm(NetBoxModelBulkEditForm):
     period_end = forms.DateField(
         required=False,
         label=_('Period end'),
-    )
-    currency = forms.ChoiceField(
-        choices=CurrencyChoices,
-        required=False,
-        label=_('Currency'),
     )
     amount = forms.DecimalField(
         max_digits=10,
@@ -679,7 +670,6 @@ class InvoiceLineForm(NetBoxModelForm):
         model = InvoiceLine
         fields = [
             'invoice',
-            'currency',
             'amount',
             'accounting_dimensions',
             'comments',
@@ -700,11 +690,6 @@ class InvoiceLineFilterForm(NetBoxModelFilterSetForm):
         required=False,
         selector=True,
         label=_('Accounting dimensions'),
-    )
-    currency = forms.ChoiceField(
-        choices=CurrencyChoices,
-        required=False,
-        label=_('Currency'),
     )
     tag = TagFilterField(model)
 
@@ -728,7 +713,6 @@ class InvoiceLineImportForm(NetBoxModelImportForm):
         model = InvoiceLine
         fields = [
             'invoice',
-            'currency',
             'amount',
             'accounting_dimensions',
             'comments',

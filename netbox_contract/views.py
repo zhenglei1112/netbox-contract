@@ -393,8 +393,6 @@ class InvoiceEditView(generic.ObjectEditView):
                 else:
                     initial_data['amount'] = 0
 
-            initial_data['currency'] = contract.currency
-
         form = self.form(instance=obj, initial=initial_data)
         restrict_form_fields(form, request.user)
 
