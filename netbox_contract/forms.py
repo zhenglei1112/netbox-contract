@@ -129,7 +129,6 @@ class ContractForm(NetBoxModelForm):
             'initial_term',
             'renewal_term',
             'notice_period',
-            'yrc',
             'mrc',
             'nrc',
             'invoice_frequency',
@@ -147,9 +146,6 @@ class ContractForm(NetBoxModelForm):
 
     def clean(self):
         super().clean()
-
-        if self.cleaned_data['mrc'] and self.cleaned_data['yrc']:
-            raise ValidationError('you should set monthly OR yearly recuring costs not both')
 
 
 class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelFilterSetForm):
@@ -236,7 +232,6 @@ class ContractCSVForm(NetBoxModelImportForm):
             'end_date',
             'initial_term',
             'renewal_term',
-            'yrc',
             'mrc',
             'nrc',
             'invoice_frequency',

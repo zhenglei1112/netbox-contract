@@ -271,7 +271,6 @@ class Contract(ContactsMixin, NetBoxModel):
         decimal_places=2,
         blank=True,
         null=True,
-        help_text=_('Use either this field of the yearly recuring cost field'),
     )
     nrc = models.DecimalField(verbose_name=_('none recuring cost'), default=0, max_digits=10, decimal_places=2)
     invoice_frequency = models.IntegerField(

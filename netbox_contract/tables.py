@@ -181,7 +181,6 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'initial_term',
             'renewal_term',
             'mrc',
-            'yrc',
             'nrc',
             'invoice_frequency',
             'documents',

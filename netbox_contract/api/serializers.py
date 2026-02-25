@@ -25,7 +25,6 @@ class NestedContractSerializer(WritableNestedSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name='plugins-api:netbox_contract-api:contract-detail'
     )
-    yrc = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     tenant = TenantSerializer(nested=True, required=False, allow_null=True)
     external_party_object_type = ContentTypeField(queryset=ContentType.objects.all())
     external_party_object = serializers.SerializerMethodField(read_only=True)
@@ -50,7 +49,6 @@ class NestedContractSerializer(WritableNestedSerializer):
             'initial_term',
             'renewal_term',
             'mrc',
-            'yrc',
             'nrc',
             'invoice_frequency',
             'comments',
@@ -113,7 +111,6 @@ class ContractSerializer(NetBoxModelSerializer):
         view_name='plugins-api:netbox_contract-api:contract-detail'
     )
     contract_type = ContractTypeSerializer(nested=True, required=False, allow_null=True)
-    yrc = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     parent = NestedContractSerializer(many=False, required=False)
     tenant = TenantSerializer(nested=True, required=False, allow_null=True)
     external_party_object_type = ContentTypeField(queryset=ContentType.objects.all())
@@ -144,7 +141,6 @@ class ContractSerializer(NetBoxModelSerializer):
             'initial_term',
             'renewal_term',
             'mrc',
-            'yrc',
             'nrc',
             'invoice_frequency',
             'comments',
@@ -173,7 +169,6 @@ class ContractSerializer(NetBoxModelSerializer):
             'initial_term',
             'renewal_term',
             'mrc',
-            'yrc',
             'nrc',
             'invoice_frequency',
             'comments',

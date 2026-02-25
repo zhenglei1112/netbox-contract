@@ -380,18 +380,10 @@ class InvoiceEditView(generic.ObjectEditView):
                 new_period_end = date.today() + delta - timedelta(days=1)
                 initial_data['period_end'] = new_period_end
 
-            if contract.yrc:
-                if contract.invoice_frequency == 12:
-                    initial_data['amount'] = contract.yrc
-                else:
-                    initial_data['amount'] = round(
-                        contract.yrc / 12 * contract.invoice_frequency, 2
-                    )
+            if contract.mrc:
+                initial_data['amount'] = contract.mrc * contract.invoice_frequency
             else:
-                if contract.mrc:
-                    initial_data['amount'] = contract.mrc * contract.invoice_frequency
-                else:
-                    initial_data['amount'] = 0
+                initial_data['amount'] = 0
 
         form = self.form(instance=obj, initial=initial_data)
         restrict_form_fields(form, request.user)
