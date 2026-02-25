@@ -211,7 +211,6 @@ class ContractView(generic.ObjectView):
                 invoice_template.invoicelines.all()
             )
             invoicelines_table.columns.hide('invoice')
-            invoicelines_table.columns.hide('currency')
             invoicelines_table.configure(request)
         else:
             invoicelines_table = None

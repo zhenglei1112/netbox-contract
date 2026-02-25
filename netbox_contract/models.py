@@ -192,6 +192,7 @@ class ContractAssignment(NetBoxModel):
 
 class Contract(ContactsMixin, NetBoxModel):
     name = models.CharField(max_length=100, verbose_name=_('name'))
+    number = models.CharField(max_length=100, blank=True, null=True, verbose_name=_('number'))
     contract_type = models.ForeignKey(
         to='netbox_contract.ContractType',
         on_delete=models.PROTECT,
@@ -323,6 +324,8 @@ class Contract(ContactsMixin, NetBoxModel):
         return None
 
     def __str__(self):
+        if self.number:
+            return f"{self.name}-{self.number}"
         return self.name
 
 

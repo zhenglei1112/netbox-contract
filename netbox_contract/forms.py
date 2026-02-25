@@ -117,6 +117,7 @@ class ContractForm(NetBoxModelForm):
         model = Contract
         fields = (
             'name',
+            'number',
             'contract_type',
             'external_party_object_type',
             'external_party_object',
@@ -151,6 +152,7 @@ class ContractForm(NetBoxModelForm):
 class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelFilterSetForm):
     model = Contract
 
+    number = forms.CharField(required=False, label=_('Number'))
     contract_type = DynamicModelChoiceField(
         queryset=ContractType.objects.all(),
         required=False,
@@ -221,6 +223,7 @@ class ContractCSVForm(NetBoxModelImportForm):
         model = Contract
         fields = [
             'name',
+            'number',
             'contract_type',
             'external_party_object_type',
             'external_party_object_id',
@@ -250,6 +253,7 @@ class ContractCSVForm(NetBoxModelImportForm):
 
 class ContractBulkEditForm(NetBoxModelBulkEditForm):
     name = forms.CharField(max_length=100, required=False, label=_('Name'))
+    number = forms.CharField(max_length=100, required=False, label=_('Number'))
     contract_type = DynamicModelChoiceField(
         queryset=ContractType.objects.all(),
         required=False,

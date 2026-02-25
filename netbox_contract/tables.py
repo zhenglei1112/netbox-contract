@@ -24,19 +24,20 @@ class TruncatedNameColumn(tables.Column):
         super().__init__(*args, **kwargs)
         self.attrs = {
             'td': {
-                'title': lambda record: getattr(record, 'name', '') if hasattr(record, 'name') else ''
+                'title': lambda record: str(record) if record else ''
             }
         }
 
-    def render(self, value):
-        if value and len(value) > 50:
+    def render(self, value, record):
+        display_value = str(record)
+        if display_value and len(display_value) > 50:
             # 保留前23个字符和后23个字符，中间用...表示
             return format_html(
                 '{}...{}',
-                value[:23],
-                value[-23:]
+                display_value[:23],
+                display_value[-23:]
             )
-        return value
+        return display_value
 
 
 class ContractTypeListTable(NetBoxTable):
@@ -169,6 +170,7 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'pk',
             'id',
             'name',
+            'number',
             'contract_type',
             'external_party_object_type',
             'external_party_object',
@@ -189,7 +191,7 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'actions',
             'compliance_manager',
         )
-        default_columns = ('name', 'status', 'contract_type', 'parent')
+        default_columns = ('name', 'number', 'status', 'contract_type', 'parent')
 
 
 class ContractListBottomTable(NetBoxTable):

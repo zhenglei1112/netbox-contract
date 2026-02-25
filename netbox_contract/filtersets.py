@@ -41,6 +41,7 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
         fields = (
             'id',
             'name',
+            'number',
             'contract_type',
             'external_reference',
             'start_date',
@@ -53,6 +54,7 @@ class ContractFilterSet(ContactModelFilterSet, NetBoxModelFilterSet, TenancyFilt
     def search(self, queryset, name, value):
         return queryset.filter(
             Q(name__icontains=value)
+            | Q(number__icontains=value)
             | Q(external_reference__icontains=value)
             | Q(comments__icontains=value),
 #            Q(status__iexact='Active'),

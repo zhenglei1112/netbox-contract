@@ -23,6 +23,10 @@
               </td>
             </tr>
             <tr>
+              <th scope="row">{% trans "Number" %}</th>
+              <td>{{ object.number|placeholder }}</td>
+            </tr>
+            <tr>
               <th scope="row">{% trans "Contract type" %}</th>
               <td>
                 <a href="{{ object.contract_type.get_absolute_url }}">{{ object.contract_type.name }}</a>
