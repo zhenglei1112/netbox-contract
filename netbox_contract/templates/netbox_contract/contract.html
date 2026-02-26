@@ -14,11 +14,11 @@
           <table class="table table-hover attr-table">
             <tr>
               <th scope="row">{% trans "Name" %}</th>
-              <td title="{{ object }}">
-                {% if object|stringformat:"s"|length > 40 %}
-                  {{ object|stringformat:"s"|slice:":13" }}...{{ object|stringformat:"s"|slice:"-23:" }}
+              <td title="{{ object.name }}">
+                {% if object.name|length > 40 %}
+                  {{ object.name|slice:":13" }}...{{ object.name|slice:"-23:" }}
                 {% else %}
-                  {{ object|stringformat:"s" }}
+                  {{ object.name }}
                 {% endif %}
               </td>
             </tr>
