@@ -332,6 +332,13 @@ class Contract(ContactsMixin, NetBoxModel):
             return self.end_date - timedelta(days=self.notice_period)
         return None
 
+    @property
+    def current_pay_until(self):
+        latest_invoice = self.invoices.filter(period_end__isnull=False).order_by('-period_end').first()
+        if latest_invoice:
+            return latest_invoice.period_end
+        return None
+
     def __str__(self):
         if self.number:
             return f"{self.name}-{self.number}"

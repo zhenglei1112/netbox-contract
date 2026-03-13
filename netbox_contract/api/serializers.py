@@ -121,6 +121,7 @@ class ContractSerializer(NetBoxModelSerializer):
         required=False,
         allow_null=True,
     )
+    current_pay_until = serializers.DateField(read_only=True)
 
     class Meta:
         model = Contract
@@ -148,6 +149,7 @@ class ContractSerializer(NetBoxModelSerializer):
             'comments',
             'compliance_manager',
             'parent',
+            'current_pay_until',
             'tags',
             'custom_fields',
             'created',
@@ -177,6 +179,7 @@ class ContractSerializer(NetBoxModelSerializer):
             'comments',
             'compliance_manager',
             'parent',
+            'current_pay_until',
         )
 
     @swagger_serializer_method(serializer_or_field=serializers.JSONField)

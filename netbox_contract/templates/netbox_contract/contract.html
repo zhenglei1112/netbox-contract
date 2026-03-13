@@ -71,6 +71,10 @@
               <td>{{ object.end_date|isodate|placeholder }}</td>
             </tr>
             {% endif %}
+            <tr>
+              <th scope="row">{% trans "当前支付到" %}</th>
+              <td>{{ object.current_pay_until|isodate|placeholder }}</td>
+            </tr>
             {% if not 'initial_term' in hidden_fields %}
             <tr>
               <th scope="row">{% trans "Initial term" %}</th>

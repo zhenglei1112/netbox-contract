@@ -2,6 +2,7 @@ import django_tables2 as tables
 
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
+from django.db.models import Max
 from netbox.tables import NetBoxTable, columns
 from tenancy.tables import ContactsColumnMixin
 
@@ -154,12 +155,19 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
     status = columns.ChoiceFieldColumn(
         verbose_name=_('Status'),
     )
+    current_pay_until = tables.DateColumn(verbose_name=_('当前支付到'), format="Y-m-d")
     tags = columns.TagColumn(url_name='plugins:netbox_contract:contract_list')
     contract_type = columns.ColoredLabelColumn(verbose_name=_('Contract type'))
     compliance_manager = tables.Column(
         verbose_name=_('Compliance Manager'),
         linkify=True
     )
+
+    def order_current_pay_until(self, queryset, is_descending):
+        queryset = queryset.annotate(
+            _current_pay_until=Max('invoices__period_end')
+        ).order_by(('-' if is_descending else '') + '_current_pay_until')
+        return (queryset, True)
 
     class Meta(NetBoxTable.Meta):
         model = Contract
@@ -184,10 +192,11 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'documents',
             'comments',
             'parent',
+            'current_pay_until',
             'actions',
             'compliance_manager',
         )
-        default_columns = ('name', 'number', 'status', 'contract_type', 'parent')
+        default_columns = ('name', 'number', 'status', 'contract_type', 'parent', 'current_pay_until')
 
 
 class ContractListBottomTable(NetBoxTable):
@@ -196,6 +205,13 @@ class ContractListBottomTable(NetBoxTable):
     status = columns.ChoiceFieldColumn(
         verbose_name=_('Status'),
     )
+    current_pay_until = tables.DateColumn(verbose_name=_('当前支付到'), format="Y-m-d")
+
+    def order_current_pay_until(self, queryset, is_descending):
+        queryset = queryset.annotate(
+            _current_pay_until=Max('invoices__period_end')
+        ).order_by(('-' if is_descending else '') + '_current_pay_until')
+        return (queryset, True)
 
     class Meta(NetBoxTable.Meta):
         model = Contract
@@ -209,12 +225,14 @@ class ContractListBottomTable(NetBoxTable):
             'status',
             'mrc',
             'comments',
+            'current_pay_until',
             'actions',
         )
         default_columns = (
             'name',
             'external_party_object',
             'status',
+            'current_pay_until',
         )
 
 
