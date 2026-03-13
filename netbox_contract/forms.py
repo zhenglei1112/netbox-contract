@@ -54,13 +54,11 @@ User = get_user_model()
 class ContractForm(NetBoxModelForm):
     comments = CommentField(label=_('Comments'))
 
-    external_party_object_type = ContentTypeChoiceField(
-        queryset=ContentType.objects.all(),
-        limit_choices_to=SERVICE_PROVIDER_MODELS,
-        widget=HTMXSelect(),
-        label=_('External party object type'),
+    external_party_object = DynamicModelChoiceField(
+        queryset=ServiceProvider.objects.all(),
+        selector=True,
+        label=_('External party object')
     )
-    external_party_object = forms.ModelChoiceField(queryset=None, label=_('External party object'))
     tenant = DynamicModelChoiceField(queryset=Tenant.objects.all(), required=False, selector=True, label=_('Tenant'))
     parent = DynamicModelChoiceField(
         queryset=Contract.objects.all(),
@@ -83,25 +81,9 @@ class ContractForm(NetBoxModelForm):
         initial = kwargs.get('initial', None)
         super().__init__(*args, **kwargs)
 
-        # Initialize the external party object gfk
-        if initial and 'external_party_object_type' in initial:
-            external_party_object_type = ContentType.objects.get_for_id(initial['external_party_object_type'])
-            external_party_class = external_party_object_type.model_class()
-            self.fields['external_party_object'].queryset = external_party_class.objects.all()
-            if (
-                self.instance.external_party_object_type
-                and self.instance.external_party_object_type.id == external_party_object_type.id
-            ):
-                self.fields['external_party_object'].initial = self.instance.external_party_object
-            else:
-                self.fields['external_party_object'].initial = None
-        elif self.instance.external_party_object_type:
-            external_party_class = self.instance.external_party_object_type.model_class()
-            self.fields['external_party_object'].queryset = external_party_class.objects.all()
+        # Initialize the external party object
+        if self.instance.pk:
             self.fields['external_party_object'].initial = self.instance.external_party_object
-        else:
-            self.fields['external_party_object'].queryset = ServiceProvider.objects.all()
-            self.fields['external_party_object'].initial = None
 
         # Initialise fields settings
         mandatory_fields = plugin_settings.get('mandatory_contract_fields')
@@ -119,7 +101,6 @@ class ContractForm(NetBoxModelForm):
             'name',
             'number',
             'contract_type',
-            'external_party_object_type',
             'external_party_object',
             'external_reference',
             'internal_party',
@@ -188,11 +169,6 @@ class ContractFilterForm(ContactModelFilterForm, TenancyFilterForm, NetBoxModelF
 
 
 class ContractCSVForm(NetBoxModelImportForm):
-    external_party_object_type = CSVContentTypeField(
-        queryset=ContentType.objects.all(),
-        limit_choices_to=SERVICE_PROVIDER_MODELS,
-        help_text='service provider object type in the form <app>.<model>',
-    )
     external_party_object_id = forms.CharField(
         help_text='service provider object name', label=_('External party name')
     )
@@ -225,7 +201,6 @@ class ContractCSVForm(NetBoxModelImportForm):
             'name',
             'number',
             'contract_type',
-            'external_party_object_type',
             'external_party_object_id',
             'external_reference',
             'internal_party',
@@ -245,8 +220,10 @@ class ContractCSVForm(NetBoxModelImportForm):
 
     def clean_external_party_object_id(self):
         name = self.cleaned_data.get('external_party_object_id')
-        external_party_object_type = self.cleaned_data.get('external_party_object_type')
-        external_party_object = external_party_object_type.get_object_for_this_type(name=name)
+        try:
+            external_party_object = ServiceProvider.objects.get(name=name)
+        except ServiceProvider.DoesNotExist:
+            raise ValidationError(f'ServiceProvider {name} not found')
 
         return external_party_object.id
 

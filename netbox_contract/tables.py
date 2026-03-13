@@ -69,7 +69,6 @@ class ContractAssignmentListTable(NetBoxTable):
             'content_object',
             'contract',
             'contract__contract_type',
-            'contract__external_party_object_type',
             'contract__external_party_object',
             'actions',
         )
@@ -79,7 +78,6 @@ class ContractAssignmentListTable(NetBoxTable):
             'content_object',
             'contract',
             'contract__contract_type',
-            'contract__external_party_object_type',
             'contract__external_party_object',
         )
 
@@ -113,7 +111,6 @@ class ContractAssignmentObjectTable(NetBoxTable):
         default_columns = (
             'pk',
             'contract',
-            'contract__external_party_object_type',
             'contract__external_party_object',
             'contract__status',
             'contract__contract_type',
@@ -172,7 +169,6 @@ class ContractListTable(ContactsColumnMixin, NetBoxTable):
             'name',
             'number',
             'contract_type',
-            'external_party_object_type',
             'external_party_object',
             'external_reference',
             'internal_party',
@@ -207,7 +203,6 @@ class ContractListBottomTable(NetBoxTable):
             'pk',
             'id',
             'name',
-            'external_party_object_type',
             'external_party_object',
             'external_reference',
             'internal_party',
@@ -218,7 +213,6 @@ class ContractListBottomTable(NetBoxTable):
         )
         default_columns = (
             'name',
-            'external_party_object_type',
             'external_party_object',
             'status',
         )

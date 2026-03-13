@@ -264,17 +264,13 @@ class ContractEditView(generic.ObjectEditView):
 
         if request.method == 'POST':
             data = normalize_querydict(request.POST)
-            obj.external_party_object_id = data['external_party_object']
-            external_party_object_type_id = data['external_party_object_type']
-            obj.external_party_object_type = ContentType.objects.get(
-                id=external_party_object_type_id
-            )
-            external_party_object_type = obj.external_party_object_type
-            obj.external_party_object = (
-                external_party_object_type.get_object_for_this_type(
-                    id=obj.external_party_object_id
-                )
-            )
+            if data.get('external_party_object'):
+                obj.external_party_object_id = data.get('external_party_object')
+                obj.external_party_object_type = ContentType.objects.get_for_model(ServiceProvider)
+                try:
+                    obj.external_party_object = ServiceProvider.objects.get(id=obj.external_party_object_id)
+                except ServiceProvider.DoesNotExist:
+                    pass
 
         return obj
 

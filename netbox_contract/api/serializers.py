@@ -26,7 +26,7 @@ class NestedContractSerializer(WritableNestedSerializer):
         view_name='plugins-api:netbox_contract-api:contract-detail'
     )
     tenant = TenantSerializer(nested=True, required=False, allow_null=True)
-    external_party_object_type = ContentTypeField(queryset=ContentType.objects.all())
+    external_party_object_type = ContentTypeField(queryset=ContentType.objects.all(), required=False, allow_null=True)
     external_party_object = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -114,7 +114,7 @@ class ContractSerializer(NetBoxModelSerializer):
     contract_type = ContractTypeSerializer(nested=True, required=False, allow_null=True)
     parent = NestedContractSerializer(many=False, required=False)
     tenant = TenantSerializer(nested=True, required=False, allow_null=True)
-    external_party_object_type = ContentTypeField(queryset=ContentType.objects.all())
+    external_party_object_type = ContentTypeField(queryset=ContentType.objects.all(), required=False, allow_null=True)
     external_party_object = serializers.SerializerMethodField(read_only=True)
     compliance_manager = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),

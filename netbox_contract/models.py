@@ -190,6 +190,14 @@ class ContractAssignment(NetBoxModel):
         return status_colors.get(self.content_object.status)
 
 
+def get_default_external_party_type():
+    try:
+        from django.contrib.contenttypes.models import ContentType
+        return ContentType.objects.get_for_model(ServiceProvider).pk
+    except Exception:
+        return None
+
+
 class Contract(ContactsMixin, NetBoxModel):
     name = models.CharField(max_length=100, verbose_name=_('name'))
     number = models.CharField(max_length=100, blank=True, null=True, verbose_name=_('number'))
@@ -206,6 +214,7 @@ class Contract(ContactsMixin, NetBoxModel):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
+        default=get_default_external_party_type,
         verbose_name=_('external party object type'),
     )
     external_party_object_id = models.PositiveBigIntegerField(
