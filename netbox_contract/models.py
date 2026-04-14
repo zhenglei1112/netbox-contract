@@ -47,9 +47,11 @@ class InternalEntityChoices(ChoiceSet):
     key = 'Contract.internal_party'
 
     ENTITY = 'Default entity'
+    GENERAL_AFFAIRS = 'general-affairs'
 
     CHOICES = [
         (ENTITY, 'Default entity', 'green'),
+        (GENERAL_AFFAIRS, '综合部', 'blue'),
     ]
 
 
