@@ -14,6 +14,17 @@ User = get_user_model()
 
 name = '合同数据质量检查脚本'
 
+PROCUREMENT_DIMENSION_MAPPING = {
+    '管道租赁': '管道',
+    '光纤租赁': '纤芯',
+    '机房租赁': '机房',
+    '机柜租赁': '机柜',
+    '机位租赁': '机位',
+    '电路租赁': '带宽',
+    '室外空地租赁': '室外空地',
+}
+
+
 class check_contract_data_quality(Script):
     class Meta:
         name = '合同数据质量检查'
@@ -159,16 +170,6 @@ class check_contract_data_quality(Script):
                     # 7. 检查合同采购品目与付款模板明细项不一致 (针对整个发票检查)
                     contract_procurement_item = contract_custom_data.get('ProcurementItem')
                     
-                    # 采购品目与统计维度映射关系
-                    procurement_mapping = {
-                        '管道租赁': '管道',
-                        '光纤租赁': '纤芯',
-                        '机房租赁': '机房',
-                        '机柜租赁': '机柜',
-                        '机位租赁': '机位',
-                        '电路租赁': '带宽'
-                    }
-                    
                     # 统一处理为列表
                     items_to_check = []
                     if isinstance(contract_procurement_item, list):
@@ -177,8 +178,8 @@ class check_contract_data_quality(Script):
                         items_to_check = [contract_procurement_item]
                         
                     for item in items_to_check:
-                        if item in procurement_mapping:
-                            expected_dimension_name = procurement_mapping[item]
+                        if item in PROCUREMENT_DIMENSION_MAPPING:
+                            expected_dimension_name = PROCUREMENT_DIMENSION_MAPPING[item]
                             
                             if expected_dimension_name not in invoice_dimensions:
                                 contract_issues.append(f'7. 采购品目不匹配: 合同包含"{item}"，但该合同的付款模板中未包含"{expected_dimension_name}"统计维度的明细项 (当前所有维度: {", ".join(invoice_dimensions) or "无"})')
