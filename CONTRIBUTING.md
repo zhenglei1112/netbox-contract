@@ -25,11 +25,17 @@ Django [Coding style](https://docs.djangoproject.com/en/stable/internals/contrib
 
 ## linting
 
-The [ruff](https://docs.astral.sh/ruff/) linter is used to enforce code style. A [pre-commit hook](./getting-started.md#3-enable-pre-commit-hooks) which runs this automatically is included with NetBox. To invoke `ruff` manually, run:
+The [ruff](https://docs.astral.sh/ruff/) linter is used to enforce code style. The repository currently keeps legacy lint findings visible as a non-blocking CI report, while critical errors and the revenue service layer are enforced. To run the required checks locally:
 
-```
-python3 -m pip install ruff
-ruff check netbox_contract/
+```bash
+python -m pip install ".[dev]"
+ruff check --select E9,F63,F7,F82 netbox_contract
+ruff check netbox_contract/services testing/run_fast_tests.py \
+  netbox_contract/tests/test_revenue_timeline.py \
+  netbox_contract/tests/test_revenue_portfolio.py \
+  netbox_contract/tests/test_revenue_view_filters.py \
+  netbox_contract/tests/test_datetime_utc_save.py \
+  netbox_contract/tests/test_detail_pagination.py
 ```
 
 
@@ -98,10 +104,19 @@ Make sure taht at the Netbox installtion step you follow the "Option B: Clone th
 
     Connect to the name or IP of the server (as defined in ALLOWED_HOSTS) on port 8000; for example, http://127.0.0.1:8000/.
 
-9. Run unittest
+9. Run tests
 
+    The fast revenue test suite does not require NetBox, PostgreSQL, or Redis:
+
+    ```bash
+    python -m pip install ".[test]"
+    python testing/run_fast_tests.py
     ```
-    $ python3 netbox/netbox/manage.py test netbox_contract
+
+    Run the complete integration suite from a configured NetBox checkout:
+
+    ```bash
+    python3 netbox/netbox/manage.py test netbox_contract
     ```
 
 10. Commit your changes and push your branch to GitHub:

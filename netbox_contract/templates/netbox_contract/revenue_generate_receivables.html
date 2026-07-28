@@ -1,0 +1,95 @@
+{% extends 'base/layout.html' %}
+{% load form_helpers %}
+{% block title %}&#29983;&#25104;&#24212;&#25910; - {{ object }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col col-md-10 offset-md-1">
+    <form method="post" class="card mb-4">
+      {% csrf_token %}
+      <h5 class="card-header">&#29983;&#25104;&#24212;&#25910;</h5>
+      <div class="card-body">
+        <p class="text-muted">&#25353;&#25351;&#23450;&#36134;&#26399;&#25195;&#25551;&#24403;&#21069;&#21512;&#21516;&#30340;&#26377;&#25928;&#21512;&#21516;&#39033;&#21644;&#35745;&#36153;&#35268;&#21017;&#65292;&#20808;&#29983;&#25104;&#39044;&#35272;&#65292;&#30830;&#35748;&#21518;&#20877;&#20889;&#20837;&#24212;&#25910;&#36134;&#21333;&#12289;&#24212;&#25910;&#26126;&#32454;&#21644;&#35745;&#36153;&#20998;&#27573;&#12290;</p>
+        {% render_form form %}
+      </div>
+      <div class="card-footer text-end">
+        <a href="{{ object.get_absolute_url }}" class="btn btn-secondary">&#21462;&#28040;</a>
+        <button type="submit" class="btn btn-primary">&#29983;&#25104;&#39044;&#35272;</button>
+      </div>
+    </form>
+
+    {% if preview %}
+    <div class="card">
+      <h5 class="card-header">&#39044;&#35272;&#32467;&#26524;</h5>
+      <div class="card-body">
+        <div class="row text-center mb-3">
+          <div class="col">
+            <div class="text-muted">&#36134;&#26399;</div>
+            <div class="fw-bold">{{ preview.billing_period }}</div>
+          </div>
+          <div class="col">
+            <div class="text-muted">&#24453;&#29983;&#25104;</div>
+            <div class="fw-bold">{{ preview.create_count }}</div>
+          </div>
+          <div class="col">
+            <div class="text-muted">&#36339;&#36807;</div>
+            <div class="fw-bold">{{ preview.skip_count }}</div>
+          </div>
+          <div class="col">
+            <div class="text-muted">&#24453;&#29983;&#25104;&#37329;&#39069;</div>
+            <div class="fw-bold">{{ preview.create_total }}</div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>&#29366;&#24577;</th>
+                <th>&#21512;&#21516;&#39033;</th>
+                <th>&#35745;&#36153;&#35268;&#21017;</th>
+                <th>&#35745;&#36153;&#21608;&#26399;</th>
+                <th>&#26377;&#25928;&#35745;&#36153;&#21306;&#38388;</th>
+                <th class="text-end">&#37329;&#39069;</th>
+                <th>&#35828;&#26126;</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in preview.rows %}
+              <tr>
+                <td>
+                  {% if row.will_create %}
+                    <span class="badge text-bg-primary">{{ row.status_label }}</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">{{ row.status_label }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ row.contract_line }}</td>
+                <td>{{ row.rule }}</td>
+                <td>{{ row.period_label }}</td>
+                <td>{{ row.active_label }}</td>
+                <td class="text-end">{{ row.amount }}</td>
+                <td>{{ row.reason }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-muted text-center">&#26410;&#25214;&#21040;&#21487;&#29983;&#25104;&#30340;&#35745;&#36153;&#35268;&#21017;&#12290;</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer text-end">
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="billing_period" value="{{ billing_period }}">
+          <input type="hidden" name="confirm_status" value="{{ confirm_status }}">
+          <input type="hidden" name="confirm" value="1">
+          <a href="{{ object.get_absolute_url }}" class="btn btn-secondary">&#36820;&#22238;&#21512;&#21516;</a>
+          <button type="submit" class="btn btn-success"{% if preview.create_count == 0 %} disabled{% endif %}>&#30830;&#35748;&#29983;&#25104;</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}

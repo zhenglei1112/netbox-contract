@@ -1,0 +1,790 @@
+{% extends 'generic/object.html' %}
+{% load plugins %}
+{% load i18n %}
+
+{% block content %}
+  {% with ws=revenue_contract_workspace overview=revenue_contract_workspace.overview profile=revenue_contract_type_profile detail=revenue_event_detail timeline=revenue_timeline display=revenue_contract_views %}
+  <div class="mb-3 text-end d-flex justify-content-end gap-2">
+    {% if object.contract_type == 'framework' or object.contract_type == 'order' or object.contract_type == 'hybrid' %}<a class="btn btn-outline-primary" href="{% url 'plugins:netbox_contract:revenueorder_add' %}?contract={{ object.pk }}">新增订单/开工单</a>{% endif %}
+    <a class="btn btn-primary" href="{% url 'plugins:netbox_contract:revenuecontract_generate_receivables' pk=object.pk %}">生成应收</a>
+  </div>
+  <style>
+    .revenue-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; }
+    .revenue-kpi { border: 1px solid var(--tblr-border-color); border-radius: .35rem; padding: .75rem; background: var(--tblr-bg-surface); }
+    .revenue-kpi .label { color: var(--tblr-secondary); font-size: .78rem; }
+    .revenue-kpi .value { font-size: 1.15rem; font-weight: 600; margin-top: .25rem; }
+    .revenue-section-title { font-size: 1rem; font-weight: 600; margin: 0; }
+    .revenue-subtle { color: var(--tblr-secondary); font-size: .8rem; }
+    .revenue-mini-table { margin: .5rem 0 0 0; }
+    .revenue-mini-table th, .revenue-mini-table td { padding: .35rem .5rem; font-size: .82rem; }
+    .revenue-pill { display: inline-block; padding: .1rem .45rem; border-radius: 999px; background: var(--tblr-bg-surface-secondary); font-size: .75rem; color: var(--tblr-secondary); }
+    .rev-stage-list { display:grid; gap:.75rem; }
+    .rev-event-filter-bar { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; }
+    .rev-event-filter-bar .form-select { width:auto; min-width:135px; max-width:190px; }
+    .rev-event-filter-summary { display:flex; flex-wrap:wrap; gap:.75rem; color:var(--tblr-secondary); font-size:.8rem; }
+    .rev-stage-node { border:1px solid var(--tblr-border-color); border-left:4px solid var(--tblr-border-color); border-radius:.35rem; padding:.85rem; background:var(--tblr-bg-surface); }
+    .rev-stage-node.success { border-left-color:#16a34a; }
+    .rev-stage-node.info { border-left-color:#2563eb; }
+    .rev-stage-node.warning { border-left-color:#d97706; }
+    .rev-stage-node.danger { border-left-color:#dc2626; }
+    .rev-stage-node.muted { opacity:.76; }
+    .rev-timeline-list { position:relative; display:grid; gap:.8rem; margin-left:.55rem; padding-left:1.2rem; }
+    .rev-timeline-list::before { content:""; position:absolute; top:.4rem; bottom:.4rem; left:.25rem; width:2px; background:var(--tblr-border-color); }
+    .rev-timeline-node { position:relative; border:1px solid var(--tblr-border-color); border-radius:.45rem; padding:.85rem; background:var(--tblr-bg-surface); }
+    .rev-timeline-node::before { content:""; position:absolute; top:1.15rem; left:-1.45rem; width:.65rem; height:.65rem; border:2px solid var(--tblr-bg-surface); border-radius:50%; background:#64748b; box-shadow:0 0 0 1px var(--tblr-border-color); }
+    .rev-timeline-node.success::before { background:#16a34a; }
+    .rev-timeline-node.info::before { background:#2563eb; }
+    .rev-timeline-node.warning::before { background:#d97706; }
+    .rev-timeline-node.danger::before { background:#dc2626; }
+    .rev-timeline-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+    .rev-timeline-date { min-width:8.5rem; font-weight:700; }
+    .rev-timeline-values { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:.45rem; margin-top:.65rem; }
+    .rev-timeline-value { border-top:1px dashed var(--tblr-border-color); padding-top:.45rem; }
+    .rev-timeline-value .label { color:var(--tblr-secondary); font-size:.7rem; }
+    .rev-timeline-value .value { font-weight:650; font-size:.86rem; }
+    .rev-stage-head { display:flex; justify-content:space-between; gap:.75rem; align-items:flex-start; }
+    .rev-stage-title { font-weight:700; }
+    .rev-stage-subtitle { color:var(--tblr-secondary); font-size:.8rem; }
+  
+
+    .rev-cal-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1rem; }
+    .rev-collapsible-summary { cursor:pointer; list-style:none; }
+    .rev-collapsible-summary::-webkit-details-marker { display:none; }
+    .rev-collapsible-summary .mdi-chevron-down { transition:transform .2s ease; }
+    details[open] > .rev-collapsible-summary .mdi-chevron-down { transform:rotate(180deg); }
+    .rev-cal-month { border:1px solid var(--tblr-border-color); border-radius:.45rem; padding:1rem; background:var(--tblr-bg-surface); min-height:145px; }
+    .rev-cal-month.danger { border-left:4px solid #dc2626; }
+    .rev-cal-month.warning { border-left:4px solid #d97706; }
+    .rev-cal-month.success { border-left:4px solid #16a34a; }
+    .rev-cal-month.info { border-left:4px solid #2563eb; }
+    .rev-cal-month.muted { opacity:.72; }
+    .rev-cal-head { display:flex; justify-content:space-between; gap:.5rem; align-items:center; margin-bottom:.5rem; }
+    .rev-cal-title { font-weight:650; }
+    .rev-cal-status { font-size:.75rem; padding:.1rem .45rem; border-radius:999px; background:var(--tblr-bg-surface-secondary); }
+    .rev-cal-numbers { display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin:.5rem 0; }
+    .rev-cal-number .label { color:var(--tblr-secondary); font-size:.72rem; }
+    .rev-cal-number .value { font-weight:650; }
+    .rev-cal-meta { color:var(--tblr-secondary); font-size:.78rem; }
+    .rev-cal-actions { display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-top:.6rem; padding-top:.6rem; border-top:1px dashed var(--tblr-border-color); }
+    .rev-cal-gap { color:var(--tblr-secondary); font-size:.78rem; }
+    .rev-wide-table { min-width:980px; margin-bottom:0; }
+    .rev-wide-table th,.rev-wide-table td { vertical-align:top; font-size:.86rem; }
+    .rev-contract-hero { --rev-accent:#475569; --rev-accent-rgb:71,85,105; border-top:4px solid var(--rev-accent); overflow:hidden; }
+    .rev-contract-hero[data-tone="blue"] { --rev-accent:#2563eb; --rev-accent-rgb:37,99,235; }
+    .rev-contract-hero[data-tone="green"] { --rev-accent:#16a34a; --rev-accent-rgb:22,163,74; }
+    .rev-contract-hero[data-tone="purple"] { --rev-accent:#7c3aed; --rev-accent-rgb:124,58,237; }
+    .rev-contract-hero[data-tone="cyan"] { --rev-accent:#0891b2; --rev-accent-rgb:8,145,178; }
+    .rev-contract-hero[data-tone="orange"] { --rev-accent:#ea580c; --rev-accent-rgb:234,88,12; }
+    .rev-contract-hero .card-header { background:linear-gradient(110deg,rgba(var(--rev-accent-rgb),.13),transparent 62%); }
+    .rev-contract-heading { display:flex; justify-content:space-between; gap:1.25rem; align-items:flex-start; width:100%; }
+    .rev-contract-eyebrow { color:var(--tblr-secondary); font-size:.75rem; letter-spacing:.04em; margin-bottom:.25rem; text-transform:uppercase; }
+    .rev-contract-title { font-size:1.25rem; font-weight:700; margin:0; }
+    .rev-contract-badges { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.45rem; }
+    .rev-type-badge { display:inline-flex; align-items:center; gap:.35rem; border:1px solid rgba(var(--rev-accent-rgb),.35); border-radius:999px; padding:.25rem .65rem; color:var(--rev-accent); background:rgba(var(--rev-accent-rgb),.1); font-weight:700; white-space:nowrap; }
+    .rev-type-intro { display:grid; grid-template-columns:minmax(0,1fr) minmax(310px,.65fr); gap:1rem; align-items:stretch; }
+    .rev-type-copy { border-left:3px solid var(--rev-accent); padding:.2rem 0 .2rem .85rem; }
+    .rev-type-copy h6 { color:var(--rev-accent); font-size:1rem; margin:0 0 .3rem; }
+    .rev-type-copy p { color:var(--tblr-secondary); margin:0; max-width:760px; }
+    .rev-type-meta { display:flex; flex-wrap:wrap; gap:.35rem 1rem; margin-top:.85rem; color:var(--tblr-secondary); font-size:.8rem; }
+    .rev-type-focus { border:1px solid rgba(var(--rev-accent-rgb),.25); border-radius:.45rem; background:rgba(var(--rev-accent-rgb),.055); padding:.75rem; }
+    .rev-type-focus-title { color:var(--rev-accent); font-size:.76rem; font-weight:700; margin-bottom:.6rem; }
+    .rev-type-highlights { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; }
+    .rev-type-highlight .label { color:var(--tblr-secondary); font-size:.7rem; }
+    .rev-type-highlight .value { font-size:1rem; font-weight:700; margin-top:.15rem; }
+    .rev-matrix-wrap { overflow:auto; }
+    .rev-matrix { min-width:1320px; margin-bottom:0; table-layout:fixed; }
+    .rev-matrix th,.rev-matrix td { padding:.45rem; text-align:center; vertical-align:middle; }
+    .rev-matrix .rev-matrix-line { position:sticky; left:0; z-index:2; width:190px; min-width:190px; text-align:left; background:var(--tblr-bg-surface); box-shadow:1px 0 0 var(--tblr-border-color); }
+    .rev-matrix-cell { border-radius:.35rem; padding:.35rem .2rem; min-height:58px; display:flex; flex-direction:column; justify-content:center; gap:.1rem; }
+    .rev-matrix-cell.success { background:rgba(22,163,74,.12); color:#15803d; }
+    .rev-matrix-cell.info { background:rgba(37,99,235,.12); color:#1d4ed8; }
+    .rev-matrix-cell.warning { background:rgba(217,119,6,.14); color:#b45309; }
+    .rev-matrix-cell.danger { background:rgba(220,38,38,.12); color:#b91c1c; }
+    .rev-matrix-cell.muted { background:var(--tblr-bg-surface-secondary); color:var(--tblr-secondary); }
+    .rev-matrix-amount { color:inherit; font-weight:700; text-decoration:none; }
+    button.rev-matrix-amount { border:0; background:transparent; width:100%; cursor:pointer; }
+    .rev-matrix-status { font-size:.7rem; white-space:nowrap; }
+    .rev-event-drawer { width:min(560px,100vw) !important; }
+    .rev-event-drawer .offcanvas-body { background:var(--tblr-bg-surface-secondary); }
+    .rev-event-section { border:1px solid var(--tblr-border-color); border-radius:.4rem; background:var(--tblr-bg-surface); padding:.8rem; margin-bottom:.75rem; }
+    .rev-event-section-title { font-size:.8rem; font-weight:700; margin-bottom:.55rem; }
+    .rev-event-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.4rem .8rem; font-size:.8rem; }
+    .rev-event-meta .label { color:var(--tblr-secondary); }
+    .rev-plan-list { display:grid; gap:.8rem; }
+    .rev-plan-track { border:1px solid var(--tblr-border-color); border-left:4px solid var(--tblr-border-color); border-radius:.45rem; background:var(--tblr-bg-surface); padding:.9rem; }
+    .rev-plan-track.success { border-left-color:#16a34a; }
+    .rev-plan-track.info { border-left-color:#2563eb; }
+    .rev-plan-track.warning { border-left-color:#d97706; }
+    .rev-plan-track.danger { border-left-color:#dc2626; }
+    .rev-plan-track-lines { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.7rem; margin-top:.75rem; }
+    .rev-plan-line { border:1px solid var(--tblr-border-color); border-radius:.35rem; padding:.7rem; min-height:118px; }
+    .rev-plan-line.original { border-style:dashed; }
+    .rev-plan-line.current { border-color:#2563eb; }
+    .rev-plan-line.actual { border-radius:1rem; }
+    .rev-plan-line-title { color:var(--tblr-secondary); font-size:.72rem; font-weight:700; margin-bottom:.4rem; }
+    .rev-plan-line-date { font-weight:650; }
+    .rev-plan-line-amount { font-size:1.05rem; font-weight:700; margin-top:.35rem; }
+    .rev-order-lanes .rev-matrix-line { width:260px; min-width:260px; }
+    .rev-order-meta { display:flex; flex-wrap:wrap; gap:.15rem .6rem; margin-top:.25rem; color:var(--tblr-secondary); font-size:.7rem; }
+    .rev-order-status { display:inline-block; margin-left:.35rem; padding:.1rem .4rem; border-radius:999px; background:var(--tblr-bg-surface-secondary); font-size:.7rem; }
+    @media (max-width:767.98px) { .rev-contract-heading { display:block; } .rev-contract-badges { justify-content:flex-start; margin-top:.75rem; } .rev-type-intro { grid-template-columns:1fr; } .rev-plan-track-lines { grid-template-columns:1fr; } }
+</style>
+
+  <div class="row mb-3">
+    <div class="col col-md-8">
+      <div class="card rev-contract-hero" data-tone="{{ profile.tone }}">
+        <div class="card-header">
+          <div class="rev-contract-heading">
+            <div>
+              <div class="rev-contract-eyebrow">收入合同 · {{ object.contract_code }}</div>
+              <h5 class="rev-contract-title">{{ object.name }}</h5>
+            </div>
+            <div class="rev-contract-badges">
+              <span class="rev-type-badge"><span>合同类型</span><span>{{ profile.label }}</span></span>
+              {% badge object.get_status_display bg_color=object.get_status_color %}
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="rev-type-intro mb-3">
+            <div class="rev-type-copy">
+              <h6>{{ profile.title }}</h6>
+              <p>{{ profile.description }}</p>
+              <div class="rev-type-meta">
+                <span>客户：{{ object.customer }}</span>
+                <span>合同期间：{{ object.start_date|date:"Y-m-d" }} — {{ object.end_date|date:"Y-m-d"|default:"长期" }}</span>
+                <span>负责人：{{ object.business_owner|default:"-" }}</span>
+              </div>
+            </div>
+            <div class="rev-type-focus">
+              <div class="rev-type-focus-title">{{ profile.focus_title }}</div>
+              <div class="rev-type-highlights">
+                {% for highlight in profile.highlights %}
+                  <div class="rev-type-highlight"><div class="label">{{ highlight.0 }}</div><div class="value">{{ highlight.1 }}</div></div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="revenue-kpi-grid">
+            <div class="revenue-kpi"><div class="label">合同金额</div><div class="value">{{ overview.contract_amount }}</div></div>
+            <div class="revenue-kpi"><div class="label">已形成应收</div><div class="value">{{ overview.receivable_total }}</div></div>
+            <div class="revenue-kpi"><div class="label">已开票</div><div class="value">{{ overview.invoiced_total }}</div></div>
+            <div class="revenue-kpi"><div class="label">已收款</div><div class="value">{{ overview.receipt_total }}</div></div>
+            <div class="revenue-kpi"><div class="label">逾期未收</div><div class="value">{{ overview.overdue_total }}</div></div>
+            <div class="revenue-kpi"><div class="label">未开票</div><div class="value">{{ overview.uninvoiced_total }}</div></div>
+            <div class="revenue-kpi"><div class="label">未收款</div><div class="value">{{ overview.unreceived_total }}</div></div>
+            <div class="revenue-kpi"><div class="label">合同开票进度</div><div class="value">{{ overview.invoice_rate }}</div></div>
+            <div class="revenue-kpi"><div class="label">应收回款率</div><div class="value">{{ overview.receipt_rate }}</div></div>
+          </div>
+          {% if overview.reconciliation.has_mismatch %}
+            <div class="alert alert-warning mt-3 mb-0" role="alert">
+              <strong>数据口径待核对：</strong>
+              账单缓存与应收明细、发票映射或回款分配的实时汇总不一致；本页金额已按实时明细关系展示。
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col col-md-4">
+      <div class="card">
+        <h5 class="card-header">关键数量</h5>
+        <table class="table table-hover attr-table mb-0">
+          <tr><th>项目</th><td>{{ overview.project_count }}</td></tr>
+          <tr><th>版本</th><td>{{ overview.version_count }}</td></tr>
+          <tr><th>合同项</th><td>{{ overview.contract_line_count }}</td></tr>
+          <tr><th>应收账单</th><td>{{ overview.bill_count }}</td></tr>
+          <tr><th>发票</th><td>{{ overview.invoice_count }}</td></tr>
+          <tr><th>回款</th><td>{{ overview.receipt_count }}</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card mb-3" id="receivable-timeline">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h5 class="card-title mb-0">{{ timeline.title }}</h5>
+        <div class="revenue-subtle">{{ timeline.totals.formed_count }}笔已形成 / {{ timeline.totals.planned_count }}笔待形成 / {{ timeline.totals.pending_trigger_count }}笔待条件触发</div>
+        {% if timeline.description %}<div class="revenue-subtle">{{ timeline.description }}</div>{% endif %}
+      </div>
+      <div class="btn-group flex-wrap" role="group" aria-label="时间轴筛选">
+        {% for item in timeline.filters %}
+          <a class="btn btn-sm {% if item.is_active %}btn-primary{% else %}btn-outline-primary{% endif %}" href="?{{ item.query_string }}#receivable-timeline">{{ item.label }} {{ item.count }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% if timeline.nodes %}
+    <div class="card-body">
+      <div class="revenue-subtle mb-2">{{ timeline.summary_label }}</div>
+      <div class="revenue-kpi-grid mb-3">
+        <div class="revenue-kpi"><div class="label">已形成应收</div><div class="value">{{ timeline.visible_totals.receivable_amount }}</div></div>
+        <div class="revenue-kpi"><div class="label">规则预计应收</div><div class="value">{{ timeline.visible_totals.planned_amount }}</div></div>
+        <div class="revenue-kpi"><div class="label">已开票</div><div class="value">{{ timeline.visible_totals.invoiced_amount }}</div></div>
+        <div class="revenue-kpi"><div class="label">已收款</div><div class="value">{{ timeline.visible_totals.received_amount }}</div></div>
+        <div class="revenue-kpi"><div class="label">未收款</div><div class="value">{{ timeline.visible_totals.unreceived_amount }}</div></div>
+      </div>
+      <div class="rev-timeline-list">
+        {% for node in timeline.nodes %}
+        <div class="rev-timeline-node {{ node.risk_level }}">
+          <div class="rev-timeline-head">
+            <div class="d-flex flex-wrap gap-3">
+              <div class="rev-timeline-date">{% if node.timeline_date %}{{ node.timeline_date|date:"Y-m-d" }}{% else %}待条件触发{% endif %}</div>
+              <div>
+                <div><span class="badge text-bg-secondary me-1">{{ node.kind_label }}</span><strong>{{ node.charge_item|default:"未命名收费项" }}</strong></div>
+                <div class="revenue-subtle">{{ node.contract_line.project|default:"未关联项目" }}{% if node.contract_line.revenue_order %} / {{ node.contract_line.revenue_order.order_code }}{% endif %} · {{ node.status_label }}</div>
+              </div>
+            </div>
+            {% if node.event_dom_id %}
+              <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#{{ node.event_dom_id }}">查看明细</button>
+            {% elif node.trigger_record %}
+              <a class="btn btn-sm btn-outline-primary" href="{{ node.trigger_record.get_absolute_url }}">查看触发记录</a>
+            {% elif node.billing_rule %}
+              <a class="btn btn-sm btn-outline-primary" href="{{ node.billing_rule.get_absolute_url }}">查看计费规则</a>
+            {% endif %}
+          </div>
+          <div class="rev-timeline-values">
+            {% if node.kind == 'formed' %}
+              <div class="rev-timeline-value"><div class="label">实际应收</div><div class="value">{{ node.actual_receivable_date|date:"Y-m-d"|default:"-" }} / {{ node.receivable_amount }}</div></div>
+              <div class="rev-timeline-value"><div class="label">到期日</div><div class="value">{{ node.due_date|date:"Y-m-d"|default:"-" }}</div></div>
+              <div class="rev-timeline-value"><div class="label">开票 / 回款 / 未收</div><div class="value">{{ node.invoiced_amount }} / {{ node.received_amount }} / {{ node.unreceived_amount }}</div></div>
+            {% else %}
+              <div class="rev-timeline-value"><div class="label">计费方式</div><div class="value">{{ node.billing_rule.get_rule_type_display|default:"-" }}</div></div>
+              <div class="rev-timeline-value"><div class="label">预计形成</div><div class="value">{{ node.current_plan_date|date:"Y-m-d"|default:"待触发" }} / {{ node.current_plan_amount }}</div></div>
+              <div class="rev-timeline-value"><div class="label">形成依据</div><div class="value">{% if node.date_certainty == 'pending_trigger' %}待{{ node.billing_rule.get_trigger_event_display }}确认{% elif node.billing_rule.rule_type == 'recurring' %}{{ node.billing_rule.get_billing_cycle_display }}计费{% else %}{{ node.billing_rule.get_trigger_event_display }}后{{ node.billing_rule.trigger_offset_days }}天{% endif %}</div></div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% elif timeline.has_data %}
+      <div class="card-body text-muted">{{ timeline.empty_filter_message }}</div>
+    {% else %}
+      <div class="card-body text-muted">当前尚无可展示的应收节点。</div>
+    {% endif %}
+  </div>
+  {% if display.mixed_lanes.should_display %}
+  <div class="card mb-3" id="hybrid-charge-lanes">
+    <div class="card-header d-flex justify-content-between align-items-center gap-3">
+      <div>
+        <h5 class="card-title mb-0">混合收费多泳道</h5>
+        <div class="revenue-subtle">{{ display.mixed_lanes.year }}年 / {{ display.mixed_lanes.lanes|length }}个当前分组 / {{ display.mixed_lanes.totals.pending_trigger_count }}个待触发节点</div>
+      </div>
+      <form method="get" class="rev-event-filter-bar" action="#hybrid-charge-lanes">
+        {% for param in display.mixed_lanes.hidden_params %}<input type="hidden" name="{{ param.name }}" value="{{ param.value }}">{% endfor %}
+        <select class="form-select form-select-sm" name="mixed_view" aria-label="混合泳道分组" onchange="this.form.elements['mixed_selected'].value=''; this.form.submit()">
+          {% for option in display.mixed_lanes.filter_options.views %}<option value="{{ option.value }}" {% if option.value == display.mixed_lanes.active_filters.view_by %}selected{% endif %}>按{{ option.label }}分组</option>{% endfor %}
+        </select>
+        <select class="form-select form-select-sm" name="mixed_selected" aria-label="混合泳道范围" onchange="this.form.submit()">
+          <option value="">全部范围</option>
+          {% if display.mixed_lanes.projection == 'charge_item' %}
+            {% for option in display.mixed_lanes.filter_options.charge_items %}<option value="{{ option.value }}" {% if option.value == display.mixed_lanes.active_filters.selected %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
+          {% elif display.mixed_lanes.projection == 'order' %}
+            {% for option in display.mixed_lanes.filter_options.orders %}<option value="{{ option.value }}" {% if option.value == display.mixed_lanes.active_filters.selected %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
+          {% else %}
+            {% for option in display.mixed_lanes.filter_options.months %}<option value="{{ option.value }}" {% if option.value == display.mixed_lanes.active_filters.selected %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
+          {% endif %}
+        </select>
+      </form>
+    </div>
+    <div class="card-body border-bottom">
+      <div class="revenue-kpi-grid">
+        <div class="revenue-kpi"><div class="label">已形成应收</div><div class="value">{{ display.mixed_lanes.totals.receivable_total }}</div></div>
+        <div class="revenue-kpi"><div class="label">已开票</div><div class="value">{{ display.mixed_lanes.totals.invoiced_total }}</div></div>
+        <div class="revenue-kpi"><div class="label">已收款</div><div class="value">{{ display.mixed_lanes.totals.receipt_total }}</div></div>
+        <div class="revenue-kpi"><div class="label">调整净额</div><div class="value">{{ display.mixed_lanes.totals.adjustment_total }}</div></div>
+        <div class="revenue-kpi"><div class="label">风险账期</div><div class="value">{{ display.mixed_lanes.totals.risk_cells }}</div></div>
+      </div>
+    </div>
+    <div class="rev-matrix-wrap">
+      <table class="table table-bordered rev-matrix rev-order-lanes">
+        <thead><tr><th class="rev-matrix-line">收费泳道</th>{% for month in display.mixed_lanes.months %}<th>{{ month.label }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for lane in display.mixed_lanes.lanes %}
+          <tr>
+            <td class="rev-matrix-line">
+              {% if display.mixed_lanes.projection == 'charge_item' %}
+                <a href="{{ lane.contract_line_url }}"><strong>{{ lane.charge_item }}</strong></a>
+                <div class="rev-order-meta">
+                  {% for type_label in lane.rule_type_labels %}<span class="revenue-pill">{{ type_label }}</span>{% empty %}<span class="revenue-pill">未配置规则</span>{% endfor %}
+                  {% if lane.pending_trigger_count %}<span class="text-warning">待触发 {{ lane.pending_trigger_count }}</span>{% endif %}
+                </div>
+                <div class="revenue-subtle">{{ lane.project }}{% if lane.order_id %} / {{ lane.order_id }}{% endif %} / 基准 {{ lane.baseline_amount }}</div>
+              {% else %}
+                <strong>{{ lane.label }}</strong>
+                <div class="rev-order-meta">
+                  {% if lane.source_lane_count %}<span>汇总 {{ lane.source_lane_count }} 个收费项目</span>{% endif %}
+                  {% if lane.pending_trigger_count %}<span class="text-warning">待触发 {{ lane.pending_trigger_count }}</span>{% endif %}
+                </div>
+              {% endif %}
+            </td>
+            {% for cell in lane.cells %}
+            <td>
+              <div class="rev-matrix-cell {{ cell.risk_level }}" title="应收 {{ cell.receivable_total }} / 开票 {{ cell.invoiced_total }} / 收款 {{ cell.receipt_total }} / 调整 {{ cell.adjustment_total }}">
+                {% if cell.primary_event_dom_id %}
+                  <button type="button" class="rev-matrix-amount" data-bs-toggle="offcanvas" data-bs-target="#{{ cell.primary_event_dom_id }}" aria-controls="{{ cell.primary_event_dom_id }}">{{ cell.receivable_total }}</button>
+                {% elif cell.status == 'planned' %}
+                  <span class="rev-matrix-amount">{{ cell.planned_amount }}</span>
+                {% else %}
+                  <span class="rev-matrix-amount">—</span>
+                {% endif %}
+                <span class="rev-matrix-status">{{ cell.status_label }}{% if cell.adjustment_total %} / 调整 {{ cell.adjustment_total }}{% endif %}</span>
+              </div>
+            </td>
+            {% endfor %}
+          </tr>
+          {% empty %}<tr><td colspan="13" class="text-muted">暂无混合收费项目</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if display.stage_timeline.is_stage_contract %}
+  <div class="card mb-3" id="stage-revenue-timeline">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h5 class="card-title mb-0">&#38454;&#27573;&#25910;&#27454;&#26102;&#38388;&#36724;</h5>
+        <span class="text-muted">{{ display.stage_timeline.totals.completed_nodes }} / {{ display.stage_timeline.nodes|length }} 个阶段已完成，{{ display.stage_timeline.totals.risk_nodes }} 个需关注，{{ display.stage_timeline.totals.pending_trigger_nodes }} 个待触发</span>
+      </div>
+      <form method="get" class="rev-event-filter-bar" action="#stage-revenue-timeline">
+        {% for param in display.stage_timeline.hidden_params %}<input type="hidden" name="{{ param.name }}" value="{{ param.value }}">{% endfor %}
+        <select class="form-select form-select-sm" name="stage_mode" aria-label="阶段节点范围" onchange="this.form.submit()">
+          {% for option in display.stage_timeline.filter_options.modes %}<option value="{{ option.value }}" {% if option.value == display.stage_timeline.active_filters.mode %}selected{% endif %}>{{ option.label }}阶段</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    <div class="card-body">
+      <div class="rev-stage-list">
+        {% for node in display.stage_timeline.nodes %}
+        <div class="rev-stage-node {{ node.risk_level }}">
+          <div class="rev-stage-head">
+            <div>
+              <div class="rev-stage-title">{{ node.index }}. {{ node.stage_name }}</div>
+              <div class="rev-stage-subtitle">{{ node.rule_type_label }} / {{ node.trigger_label }}</div>
+              <div class="rev-stage-subtitle">{{ node.date_summary }}{% if node.delay_days %} / 延迟 {{ node.delay_days }} 天{% endif %}</div>
+            </div>
+            <span class="rev-cal-status">{{ node.status_label }}</span>
+          </div>
+          <div class="rev-cal-numbers">
+            <div class="rev-cal-number"><div class="label">规则金额</div><div class="value">{{ node.planned_amount }}</div></div>
+            <div class="rev-cal-number"><div class="label">应收</div><div class="value">{{ node.receivable_total }}</div></div>
+            <div class="rev-cal-number"><div class="label">回款</div><div class="value">{{ node.receipt_total }}</div></div>
+          </div>
+          <div class="rev-stage-subtitle">触发依据：{{ node.trigger_label }}{% if node.actual_receivable_date_label %} / 实际应收：{{ node.actual_receivable_date_label }}{% else %} / 尚未形成应收{% endif %}</div>
+          <details class="mt-2"><summary class="rev-stage-subtitle">&#26597;&#30475;&#38454;&#27573;&#20840;&#38142;&#36335;</summary>
+            <table class="table revenue-mini-table"><thead><tr><th>&#24212;&#25910;</th><th>&#24320;&#31080;</th><th>&#22238;&#27454;</th><th>&#26410;&#22238;</th></tr></thead><tbody>
+              {% for row in node.chain_rows %}<tr><td><a href="{{ row.bill_url }}">{{ row.net_amount }}</a></td><td>{{ row.mapped_amount }}</td><td>{{ row.receipted_amount }}</td><td>{{ row.unreceived_amount }}</td></tr>{% empty %}<tr><td colspan="4" class="text-muted">&#26412;&#38454;&#27573;&#26410;&#29983;&#25104;&#24212;&#25910;</td></tr>{% endfor %}
+            </tbody></table>
+          </details>
+        </div>
+        {% empty %}<div class="text-muted">&#26410;&#37197;&#32622;&#38454;&#27573;&#24615;&#35745;&#36153;&#35268;&#21017;&#12290;</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if display.periodic_matrix.has_recurring_lines and object.contract_type != 'hybrid' %}
+  <div class="card mb-3" id="periodic-billing-matrix">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h5 class="card-title mb-0">周期账单矩阵</h5>
+        <span class="text-muted">{{ display.periodic_matrix.year }}年 / {{ display.periodic_matrix.rows|length }}个收费项目 / {{ display.periodic_matrix.totals.risk_cells }}个风险账期</span>
+      </div>
+      <form method="get" class="rev-event-filter-bar" action="#periodic-billing-matrix">
+        {% for param in display.periodic_matrix.hidden_params %}<input type="hidden" name="{{ param.name }}" value="{{ param.value }}">{% endfor %}
+        <select class="form-select form-select-sm" name="matrix_anomalies" aria-label="周期矩阵范围" onchange="this.form.submit()">
+          <option value="" {% if not display.periodic_matrix.active_filters.anomalies_only %}selected{% endif %}>全部账期</option>
+          <option value="1" {% if display.periodic_matrix.active_filters.anomalies_only %}selected{% endif %}>仅看异常</option>
+        </select>
+      </form>
+    </div>
+    <div class="rev-matrix-wrap">
+      <table class="table table-bordered rev-matrix">
+        <thead>
+          <tr>
+            <th class="rev-matrix-line">收费项目</th>
+            {% for month in display.periodic_matrix.months %}<th>{{ month.label }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for matrix_row in display.periodic_matrix.rows %}
+          <tr>
+            <td class="rev-matrix-line">
+              <a href="{{ matrix_row.contract_line_url }}"><strong>{{ matrix_row.charge_item }}</strong></a>
+              <div class="revenue-subtle">{{ matrix_row.project }}{% if matrix_row.order_id %} / {{ matrix_row.order_id }}{% endif %}</div>
+            </td>
+            {% for cell in matrix_row.cells %}
+            <td>
+              <div class="rev-matrix-cell {{ cell.risk_level }}" title="应收 {{ cell.receivable_total }} / 开票 {{ cell.invoiced_total }} / 收款 {{ cell.receipt_total }}">
+                {% if cell.status == 'not_applicable' %}
+                  <span class="rev-matrix-amount">—</span>
+                {% elif cell.primary_event_dom_id %}
+                  <button type="button" class="rev-matrix-amount" data-bs-toggle="offcanvas" data-bs-target="#{{ cell.primary_event_dom_id }}" aria-controls="{{ cell.primary_event_dom_id }}">{{ cell.receivable_total }}</button>
+                {% else %}
+                  <span class="rev-matrix-amount">{{ cell.planned_amount }}</span>
+                {% endif %}
+                <span class="rev-matrix-status">{{ cell.status_label }}</span>
+              </div>
+            </td>
+            {% endfor %}
+          </tr>
+          {% empty %}
+          <tr><td colspan="13" class="text-muted">暂无周期性计费项目</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if display.order_lanes.should_display %}
+  <div class="card mb-3" id="hybrid-order-lanes">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h5 class="card-title mb-0">订单/开工单泳道</h5>
+        <span class="text-muted">{{ display.order_lanes.year }}年 / {{ display.order_lanes.order_count }}个订单实体 / {{ display.order_lanes.legacy_count }}个迁移待核对 / {{ display.order_lanes.unfiled_count }}个未建档</span>
+      </div>
+      <form method="get" class="rev-event-filter-bar" action="#hybrid-order-lanes">
+        {% for param in display.order_lanes.hidden_params %}<input type="hidden" name="{{ param.name }}" value="{{ param.value }}">{% endfor %}
+        <select class="form-select form-select-sm" name="order_project" aria-label="订单项目" onchange="this.form.submit()">
+          <option value="">全部项目</option>
+          {% for option in display.order_lanes.filter_options.projects %}<option value="{{ option.value }}" {% if option.value == display.order_lanes.active_filters.project %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
+        </select>
+        <select class="form-select form-select-sm" name="order_status" aria-label="订单状态" onchange="this.form.submit()">
+          <option value="">全部状态</option>
+          {% for option in display.order_lanes.filter_options.order_statuses %}<option value="{{ option.value }}" {% if option.value == display.order_lanes.active_filters.order_status %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    <div class="card-body border-bottom">
+      <div class="revenue-kpi-grid">
+        <div class="revenue-kpi"><div class="label">框架上限/合同金额</div><div class="value">{{ display.order_lanes.framework_limit|default_if_none:"-" }}</div></div>
+        <div class="revenue-kpi"><div class="label">已下单金额</div><div class="value">{{ display.order_lanes.ordered_amount }}</div></div>
+        <div class="revenue-kpi"><div class="label">已形成应收</div><div class="value">{{ display.order_lanes.receivable_total }}</div></div>
+        <div class="revenue-kpi"><div class="label">已收款</div><div class="value">{{ display.order_lanes.receipt_total }}</div></div>
+        <div class="revenue-kpi"><div class="label">剩余额度</div><div class="value">{{ display.order_lanes.remaining_limit|default_if_none:"-" }}</div></div>
+      </div>
+      <div class="revenue-subtle mt-2">已建档订单使用订单事实金额；尚未映射实体的历史订单号暂以合同项单价 × 数量估算，并单独标记。</div>
+      {% if display.order_lanes.legacy_count %}
+        <div class="alert alert-info mt-2 mb-0">有 {{ display.order_lanes.legacy_count }} 个历史订单由原订单号迁移或仍在兼容展示，订单金额需要业务核对。</div>
+      {% endif %}
+      {% if display.order_lanes.unfiled_count %}
+        <div class="alert alert-warning mt-2 mb-0">存在未填写订单/开工单编号的合同项，已按合同项分别归入“未建档订单”。</div>
+      {% endif %}
+    </div>
+    <div class="rev-matrix-wrap">
+      <table class="table table-bordered rev-matrix rev-order-lanes">
+        <thead>
+          <tr>
+            <th class="rev-matrix-line">订单/开工单</th>
+            {% for month in display.order_lanes.months %}<th>{{ month.label }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for lane in display.order_lanes.lanes %}
+          <tr>
+            <td class="rev-matrix-line">
+              {% if lane.order_url %}<a href="{{ lane.order_url }}"><strong>{{ lane.label }}</strong></a>{% else %}<strong>{{ lane.label }}</strong>{% endif %}<span class="rev-order-status">{% if lane.order_status_label %}{{ lane.order_status_label }} / {% endif %}{{ lane.status_label }}</span>
+              <div class="rev-order-meta">
+                <span>订单金额 {{ lane.order_amount }}</span>
+                <span>合同项 {{ lane.line_count }}</span>
+                <span>基准 {{ lane.baseline_amount }}</span>
+                <span>应收 {{ lane.receivable_total }}</span>
+                <span>收款 {{ lane.receipt_total }}</span>
+              </div>
+              <div class="revenue-subtle">
+                {% for project in lane.projects %}{{ project }}{% if not forloop.last %}、{% endif %}{% endfor %}
+                / {{ lane.start_date|date:"Y-m-d" }} — {{ lane.end_date|date:"Y-m-d"|default:"长期" }}
+              </div>
+            </td>
+            {% for cell in lane.cells %}
+            <td>
+              <div class="rev-matrix-cell {{ cell.risk_level }}" title="应收 {{ cell.receivable_total }} / 开票 {{ cell.invoiced_total }} / 收款 {{ cell.receipt_total }}">
+                {% if cell.primary_event_dom_id %}
+                  <button type="button" class="rev-matrix-amount" data-bs-toggle="offcanvas" data-bs-target="#{{ cell.primary_event_dom_id }}" aria-controls="{{ cell.primary_event_dom_id }}">{{ cell.receivable_total }}</button>
+                {% else %}
+                  <span class="rev-matrix-amount">—</span>
+                {% endif %}
+                <span class="rev-matrix-status">{{ cell.status_label }}</span>
+              </div>
+            </td>
+            {% endfor %}
+          </tr>
+          {% empty %}
+          <tr><td colspan="13" class="text-muted">暂无订单或开工单合同项</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs" role="tablist">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#contract-chain" role="tab">全链路</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#contract-structure" role="tab">合同结构</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#contract-receivable" role="tab">应收</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#contract-invoice" role="tab">发票</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#contract-receipt" role="tab">回款</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#contract-fields" role="tab">原始字段</a></li>
+      </ul>
+    </div>
+    <div class="card-body tab-content">
+      <div class="tab-pane active" id="contract-chain" role="tabpanel">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+          <div>
+            <h5 class="revenue-section-title">&#24212;&#25910; -> &#21457;&#31080; -> &#22238;&#27454;&#20840;&#38142;&#36335;</h5>
+            <span class="revenue-subtle">显示 {{ detail.filtered_count }} / {{ detail.total_count }} 条应收明细</span>
+          </div>
+          <form method="get" action="{{ request.path }}#contract-chain" class="rev-event-filter-bar" aria-label="应收明细筛选">
+            <select class="form-select form-select-sm" name="event_project" aria-label="项目" onchange="this.form.submit()">
+              <option value="">全部项目</option>
+              {% for value,label in detail.projects %}<option value="{{ value }}"{% if detail.values.event_project == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <select class="form-select form-select-sm" name="event_order" aria-label="订单或开工单" onchange="this.form.submit()">
+              <option value="">全部订单</option>
+              {% for value,label in detail.orders %}<option value="{{ value }}"{% if detail.values.event_order == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <select class="form-select form-select-sm" name="event_period" aria-label="账期" onchange="this.form.submit()">
+              <option value="">全部账期</option>
+              {% for value in detail.periods %}<option value="{{ value }}"{% if detail.values.event_period == value %} selected{% endif %}>{{ value }}</option>{% endfor %}
+            </select>
+            <select class="form-select form-select-sm" name="event_status" aria-label="状态" onchange="this.form.submit()">
+              <option value="">全部状态</option>
+              {% for value,label in detail.statuses %}<option value="{{ value }}"{% if detail.values.event_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <select class="form-select form-select-sm" name="event_risk" aria-label="风险" onchange="this.form.submit()">
+              <option value="">全部风险</option>
+              {% for value,label in detail.risks %}<option value="{{ value }}"{% if detail.values.event_risk == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            {% if detail.active_count %}<a class="btn btn-sm btn-outline-secondary btn-icon" href="{{ request.path }}#contract-chain" title="清除筛选" aria-label="清除筛选"><i class="mdi mdi-filter-remove-outline" aria-hidden="true"></i></a>{% endif %}
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'plugins:netbox_contract:revenuecontract_event_export' pk=object.pk %}{% if detail.query_string %}?{{ detail.query_string }}{% endif %}"><i class="mdi mdi-download" aria-hidden="true"></i> 导出</a>
+          </form>
+        </div>
+        <div class="rev-event-filter-summary mb-2">
+          <span>应收 {{ detail.totals.receivable }}</span>
+          <span>开票 {{ detail.totals.invoiced }}</span>
+          <span>回款 {{ detail.totals.received }}</span>
+          <span>未回 {{ detail.totals.unreceived }}</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover rev-wide-table">
+            <thead>
+              <tr><th>账期</th><th>项目</th><th>订单/开工单</th><th>合同项</th><th>应收账单</th><th>状态/风险</th><th class="text-end">应收</th><th class="text-end">开票</th><th class="text-end">回款</th><th class="text-end">未回</th><th>发票/回款明细</th></tr>
+            </thead>
+            <tbody>
+              {% for row in detail.rows %}
+                <tr>
+                  <td>{{ row.billing_period }}</td>
+                  <td>{{ row.contract_line.project|default:"-" }}</td>
+                  <td>{{ row.detail_order_label }}</td>
+                  <td><a href="{{ row.contract_line_url }}">{{ row.contract_line }}</a></td>
+                  <td><a href="{{ row.bill_url }}">{{ row.bill.bill_code }}</a></td>
+                  <td><span class="badge {{ row.detail_badge_class }}">{{ row.detail_status_label }}</span><div class="revenue-subtle">{{ row.risk_level }}</div></td>
+                  <td class="text-end">{{ row.net_amount }}</td>
+                  <td class="text-end">{{ row.mapped_amount }}</td>
+                  <td class="text-end">{{ row.receipted_amount }}</td>
+                  <td class="text-end">{{ row.unreceived_amount }}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-primary mb-1" data-bs-toggle="offcanvas" data-bs-target="#{{ row.event_dom_id }}" aria-controls="{{ row.event_dom_id }}">查看链路</button>
+                    {% for mapping in row.mappings %}
+                      <div><a href="{{ mapping.invoice_url }}">{{ mapping.invoice }}</a> / &#26144;&#23556; {{ mapping.mapped_amount }} / &#22238;&#27454; {{ mapping.receipt_amount }}</div>
+                    {% empty %}<span class="text-muted">&#26410;&#20851;&#32852;&#21457;&#31080;</span>{% endfor %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="11" class="text-center text-muted py-4">当前筛选条件下暂无应收明细</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="contract-structure" role="tabpanel">
+        <h5 class="revenue-section-title mb-2">按合同项组织</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>合同项</th><th>项目</th><th>版本</th><th>单价</th><th>数量</th><th>计费规则</th><th>计费分段</th><th>应收合计</th></tr></thead>
+            <tbody>
+              {% for group in ws.contract_line_groups %}
+                <tr>
+                  <td><a href="{{ group.url }}">{{ group.contract_line.charge_item }}</a></td>
+                  <td>{{ group.project }}</td>
+                  <td>{{ group.version }}</td>
+                  <td>{{ group.contract_line.unit_price }}</td>
+                  <td>{{ group.contract_line.quantity }} {{ group.contract_line.unit }}</td>
+                  <td>{{ group.rules|length }}</td>
+                  <td>{{ group.segments|length }}</td>
+                  <td>{{ group.receivable_total }}</td>
+                </tr>
+              {% empty %}<tr><td colspan="8" class="text-muted">暂无合同项</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="contract-receivable" role="tabpanel">
+        <h5 class="revenue-section-title mb-2">按应收账单组织</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>账单</th><th>账期</th><th>应收净额</th><th>已开票</th><th>未开票</th><th>已回款</th><th>未回款</th><th>明细数</th></tr></thead>
+            <tbody>
+              {% for group in ws.receivable_bill_groups %}
+                <tr>
+                  <td><a href="{{ group.url }}">{{ group.bill.bill_code }}</a></td><td>{{ group.bill.billing_period }}</td><td>{{ group.net_amount }}</td><td>{{ group.invoiced_amount }}</td><td>{{ group.unbilled_amount }}</td><td>{{ group.receipted_amount }}</td><td>{{ group.unreceived_amount }}</td><td>{{ group.line_count }}</td>
+                </tr>
+              {% empty %}<tr><td colspan="8" class="text-muted">暂无应收账单</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="contract-invoice" role="tabpanel">
+        <h5 class="revenue-section-title mb-2">按发票组织</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>发票</th><th>开票日期</th><th>金额</th><th>明细数</th><th>已映射</th></tr></thead>
+            <tbody>
+              {% for group in ws.invoice_groups %}
+                <tr>
+                  <td><a href="{{ group.url }}">{{ group.invoice }}</a></td><td>{{ group.invoice.invoice_date|date:"Y年n月j日" }}</td><td>{{ group.invoice.amount }}</td><td>{{ group.lines|length }}</td><td>{% for line in group.lines %}{{ line.mapped_amount }}{% if not forloop.last %}<br>{% endif %}{% empty %}-{% endfor %}</td>
+                </tr>
+              {% empty %}<tr><td colspan="5" class="text-muted">暂无发票</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="contract-receipt" role="tabpanel">
+        <h5 class="revenue-section-title mb-2">按回款流水组织</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>银行流水</th><th>到账日期</th><th>到账金额</th><th>本合同已分配</th><th>未分配</th><th>分配数</th></tr></thead>
+            <tbody>
+              {% for group in ws.receipt_groups %}
+                <tr>
+                  <td><a href="{{ group.url }}">{{ group.receipt.bank_flow_no }}</a></td><td>{{ group.receipt.receipt_date|date:"Y年n月j日" }}</td><td>{{ group.receipt.amount }}</td><td>{{ group.allocated_amount }}</td><td>{{ group.receipt.unallocated_amount }}</td><td>{{ group.allocation_count }}</td>
+                </tr>
+              {% empty %}<tr><td colspan="6" class="text-muted">暂无回款</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="contract-fields" role="tabpanel">
+        <table class="table table-hover attr-table">
+          {% for field in revenue_object_fields %}
+            <tr>
+              <th scope="row">{{ field.label }}</th>
+              <td>
+                {% if field.link %}<a href="{{ field.link }}">{{ field.value }}</a>{% elif field.value is not None and field.value != '' %}{{ field.value }}{% else %}<span class="text-muted">-</span>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% for row in ws.chain_rows %}
+  <div class="offcanvas offcanvas-end rev-event-drawer" tabindex="-1" id="{{ row.event_dom_id }}" aria-labelledby="{{ row.event_dom_id }}-title">
+    <div class="offcanvas-header border-bottom">
+      <div>
+        <div class="revenue-subtle">统一应收事件 · {{ row.billing_period }}</div>
+        <h5 class="offcanvas-title" id="{{ row.event_dom_id }}-title">{{ row.contract_line.charge_item }}</h5>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="关闭"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="badge text-bg-secondary">{{ row.collection_status_label }}</span>
+        <span class="revenue-subtle">{{ row.event_key }}</span>
+      </div>
+
+      {% if not row.is_confirmed %}<div class="alert alert-warning">该应收仍为{{ row.bill.get_confirm_status_display }}，不计入合同执行金额。</div>{% endif %}
+      {% if row.has_amount_error %}<div class="alert alert-danger">开票或回款金额超过应收净额，请核对映射与分配记录。</div>{% endif %}
+
+      <div class="rev-event-section">
+        <div class="rev-event-section-title">业务与应收</div>
+        <div class="rev-event-meta">
+          <div><div class="label">合同项</div><a href="{{ row.contract_line_url }}">{{ row.contract_line }}</a></div>
+          <div><div class="label">项目 / 订单</div>{{ row.contract_line.project }}{% if row.contract_line.revenue_order %} / <a href="{{ row.contract_line.revenue_order.get_absolute_url }}">{{ row.contract_line.revenue_order.order_code }}</a>{% elif row.contract_line.order_id %} / {{ row.contract_line.order_id }}{% else %} / 未建档{% endif %}</div>
+          <div><div class="label">计费期间</div>{{ row.line.start_date|date:"Y-m-d" }} — {{ row.line.end_date|date:"Y-m-d" }}</div>
+          <div><div class="label">应收 / 到期</div>{{ row.receivable_date|date:"Y-m-d" }} / {{ row.due_date|date:"Y-m-d" }}</div>
+        </div>
+        <div class="revenue-kpi-grid mt-3">
+          <div class="revenue-kpi"><div class="label">应收净额</div><div class="value">{{ row.net_amount }}</div></div>
+          <div class="revenue-kpi"><div class="label">已开票</div><div class="value">{{ row.mapped_amount }}</div></div>
+          <div class="revenue-kpi"><div class="label">已收款</div><div class="value">{{ row.receipted_amount }}</div></div>
+          <div class="revenue-kpi"><div class="label">尚未收款</div><div class="value">{{ row.unreceived_amount }}</div></div>
+        </div>
+      </div>
+
+      <div class="rev-event-section">
+        <div class="rev-event-section-title">应收账单</div>
+        <div class="rev-event-meta">
+          <div><div class="label">账单</div><a href="{{ row.bill_url }}">{{ row.bill.bill_code }}</a></div>
+          <div><div class="label">应收明细</div><a href="{{ row.line_url }}">{{ row.line }}</a></div>
+          <div><div class="label">原始金额</div>{{ row.line.amount }}</div>
+          <div><div class="label">调整金额</div>{{ row.line.adjusted_amount }}</div>
+        </div>
+        {% if row.line.adjusted_amount and not row.adjustment_records %}<div class="alert alert-warning mt-2 mb-0">存在历史调整净额，但调整类型与原因尚未补录。</div>{% endif %}
+      </div>
+
+      <div class="rev-event-section">
+        <div class="rev-event-section-title">调整事项</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>日期</th><th>类型</th><th class="text-end">金额</th><th>原因</th><th>状态</th></tr></thead>
+            <tbody>
+              {% for adjustment in row.adjustment_records %}
+              <tr><td>{{ adjustment.adjustment_date|date:"Y-m-d" }}</td><td><a href="{{ adjustment.get_absolute_url }}">{{ adjustment.get_adjustment_type_display }}</a></td><td class="text-end">{{ adjustment.amount }}</td><td>{{ adjustment.reason }}</td><td>{{ adjustment.get_status_display }}</td></tr>
+              {% empty %}<tr><td colspan="5" class="text-muted">暂无可追溯调整记录</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rev-event-section">
+        <div class="rev-event-section-title">发票映射</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>发票</th><th class="text-end">映射</th><th class="text-end">关联回款</th><th>状态</th></tr></thead>
+            <tbody>
+              {% for mapping in row.mappings %}
+              <tr><td><a href="{{ mapping.invoice_url }}">{{ mapping.invoice }}</a></td><td class="text-end">{{ mapping.mapped_amount }}</td><td class="text-end">{{ mapping.receipt_amount }}</td><td>{{ mapping.mapping.get_status_display }}</td></tr>
+              {% empty %}<tr><td colspan="4" class="text-muted">尚未关联发票</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rev-event-section">
+        <div class="rev-event-section-title">回款分配</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>银行流水</th><th>到账日期</th><th class="text-end">分配金额</th><th>状态</th></tr></thead>
+            <tbody>
+              {% for allocation in row.receipt_allocations %}
+              <tr><td><a href="{{ allocation.receipt.get_absolute_url }}">{{ allocation.receipt.bank_flow_no }}</a></td><td>{{ allocation.receipt.receipt_date|date:"Y-m-d" }}</td><td class="text-end">{{ allocation.allocated_amount }}</td><td>{{ allocation.get_status_display }}</td></tr>
+              {% empty %}<tr><td colspan="4" class="text-muted">尚未分配回款</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="offcanvas-footer border-top p-3 d-flex gap-2 justify-content-end">
+      <a class="btn btn-outline-secondary" href="{{ row.bill_url }}">打开账单</a>
+      <a class="btn btn-primary" href="{{ row.line_url }}">打开应收明细</a>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% include 'inc/panels/custom_fields.html' %}
+  {% include 'inc/panels/tags.html' %}
+  {% endwith %}
+
+{% plugin_right_page object %}
+{% endblock content %}

@@ -424,3 +424,82 @@ class AccountingDimensionSerializer(NetBoxModelSerializer):
             'last_updated',
         )
         brief_fields = ('id', 'name', 'value', 'url', 'display')
+
+
+from ..models import (
+    RevenueCustomer, RevenueProject, RevenueContract, RevenueContractProject, RevenueOrder, RevenueContractVersion,
+    RevenueContractLine, RevenueBillingRule, RevenueBillingSegment, RevenueReceivablePlan,
+    RevenueReceivablePlanVersion, RevenueTriggerRecord, RevenueAdjustmentRecord,
+    RevenueReceivableBill, RevenueReceivableLine, RevenueInvoice,
+    RevenueInvoiceLine, RevenueInvoiceMapping, RevenueReceipt, RevenueReceiptAllocation,
+    RevenueSyncLog,
+)
+
+
+_REVENUE_SERIALIZER_MODELS = [
+    RevenueCustomer, RevenueProject, RevenueContract, RevenueContractProject, RevenueOrder, RevenueContractVersion,
+    RevenueContractLine, RevenueBillingRule, RevenueBillingSegment, RevenueReceivablePlan,
+    RevenueReceivablePlanVersion, RevenueTriggerRecord, RevenueAdjustmentRecord,
+    RevenueReceivableBill, RevenueReceivableLine, RevenueInvoice,
+    RevenueInvoiceLine, RevenueInvoiceMapping, RevenueReceipt, RevenueReceiptAllocation,
+    RevenueSyncLog,
+]
+
+for _revenue_model in _REVENUE_SERIALIZER_MODELS:
+    _meta = type('Meta', (), {
+        'model': _revenue_model,
+        'fields': '__all__',
+        'brief_fields': ('id', 'display'),
+    })
+    globals()[f'{_revenue_model.__name__}Serializer'] = type(
+        f'{_revenue_model.__name__}Serializer',
+        (NetBoxModelSerializer,),
+        {'Meta': _meta},
+    )
+_RevenueOrderSerializerBase = globals()['RevenueOrderSerializer']
+
+
+class RevenueOrderSerializer(_RevenueOrderSerializerBase):
+    def validate(self, data):
+        contract = data.get('contract', getattr(self.instance, 'contract', None))
+        project = data.get('project', getattr(self.instance, 'project', None))
+        amount = data.get('amount', getattr(self.instance, 'amount', None))
+        start_date = data.get('start_date', getattr(self.instance, 'start_date', None))
+        end_date = data.get('end_date', getattr(self.instance, 'end_date', None))
+        errors = {}
+        if contract and project and project.customer_id != contract.customer_id:
+            errors['project'] = '订单项目与合同必须属于同一客户。'
+        if amount is not None and amount < 0:
+            errors['amount'] = '订单金额不能为负数。'
+        if start_date and end_date and end_date < start_date:
+            errors['end_date'] = '订单结束日期不能早于开始日期。'
+        if errors:
+            raise serializers.ValidationError(errors)
+        return super().validate(data)
+
+
+_RevenueContractLineSerializerBase = globals()['RevenueContractLineSerializer']
+
+
+class RevenueContractLineSerializer(_RevenueContractLineSerializerBase):
+    def validate(self, data):
+        contract = data.get('contract', getattr(self.instance, 'contract', None))
+        project = data.get('project', getattr(self.instance, 'project', None))
+        contract_version = data.get(
+            'contract_version', getattr(self.instance, 'contract_version', None)
+        )
+        revenue_order = data.get(
+            'revenue_order', getattr(self.instance, 'revenue_order', None)
+        )
+        errors = {}
+        if contract and contract_version and contract_version.contract_id != contract.pk:
+            errors['contract_version'] = '合同版本必须属于所选合同。'
+        if contract and project and project.customer_id != contract.customer_id:
+            errors['project'] = '合同项项目与合同必须属于同一客户。'
+        if contract and revenue_order and revenue_order.contract_id != contract.pk:
+            errors['revenue_order'] = '订单必须属于所选合同。'
+        elif project and revenue_order and revenue_order.project_id != project.pk:
+            errors['revenue_order'] = '订单必须属于所选项目。'
+        if errors:
+            raise serializers.ValidationError(errors)
+        return super().validate(data)

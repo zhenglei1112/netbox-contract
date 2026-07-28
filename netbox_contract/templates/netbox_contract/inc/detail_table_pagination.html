@@ -1,0 +1,30 @@
+{% load i18n %}
+{% if table.page %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 py-2 border-top">
+  <div class="text-muted small">
+    {{ table.page.start_index }}-{{ table.page.end_index }} / {{ table.paginator.count }}
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <label class="d-flex align-items-center gap-1 small text-muted mb-0">
+      <span>{% trans "Per page" %}</span>
+      <select class="form-select form-select-sm" aria-label="{% trans 'Per page' %}"
+              onchange="const url = new URL(window.location.href); url.searchParams.set('per_page', this.value); ['invoice_lines_page', 'assignments_page', 'children_page', 'invoices_page', 'contracts_page'].forEach((key) => url.searchParams.delete(key)); window.location.assign(url.toString());">
+        {% for size in detail_page_sizes %}
+          <option value="{{ size }}" {% if size == detail_per_page %}selected{% endif %}>{{ size }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% if table.page.has_previous %}
+      <a class="btn btn-sm btn-outline-secondary" href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ table.page.previous_page_number }}">{% trans "Previous" %}</a>
+    {% else %}
+      <span class="btn btn-sm btn-outline-secondary disabled">{% trans "Previous" %}</span>
+    {% endif %}
+    <span class="small text-muted">{{ table.page.number }} / {{ table.paginator.num_pages }}</span>
+    {% if table.page.has_next %}
+      <a class="btn btn-sm btn-outline-secondary" href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ table.page.next_page_number }}">{% trans "Next" %}</a>
+    {% else %}
+      <span class="btn btn-sm btn-outline-secondary disabled">{% trans "Next" %}</span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

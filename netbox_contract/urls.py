@@ -324,3 +324,46 @@ urlpatterns = [
         name='invoice_generate_eip_summary',
     ),
 ]
+
+urlpatterns += [
+    path('revenue/receivables/overview/', views.RevenueReceivableOverviewView.as_view(), name='revenuereceivable_overview'),
+    path('revenue/contracts/<int:pk>/generate-receivables/', views.RevenueContractGenerateReceivablesView.as_view(), name='revenuecontract_generate_receivables'),
+    path('revenue/contracts/<int:pk>/events/export/', views.RevenueContractEventExportView.as_view(), name='revenuecontract_event_export'),
+    path('revenue/contracts/<int:pk>/visual/', views.RevenueContractVisualView.as_view(), name='revenuecontract_visual'),
+    path('revenue/contracts/<int:pk>/executive/', views.RevenueContractExecutiveView.as_view(), name='revenuecontract_executive'),
+]
+
+_REVENUE_URL_SPECS = [
+    ('revenue/customers', 'revenuecustomer', models.RevenueCustomer, views.RevenueCustomerListView, views.RevenueCustomerEditView, views.RevenueCustomerDeleteView),
+    ('revenue/projects', 'revenueproject', models.RevenueProject, views.RevenueProjectListView, views.RevenueProjectEditView, views.RevenueProjectDeleteView),
+    ('revenue/contracts', 'revenuecontract', models.RevenueContract, views.RevenueContractListView, views.RevenueContractEditView, views.RevenueContractDeleteView),
+    ('revenue/contract-projects', 'revenuecontractproject', models.RevenueContractProject, views.RevenueContractProjectListView, views.RevenueContractProjectEditView, views.RevenueContractProjectDeleteView),
+    ('revenue/orders', 'revenueorder', models.RevenueOrder, views.RevenueOrderListView, views.RevenueOrderEditView, views.RevenueOrderDeleteView),
+    ('revenue/contract-versions', 'revenuecontractversion', models.RevenueContractVersion, views.RevenueContractVersionListView, views.RevenueContractVersionEditView, views.RevenueContractVersionDeleteView),
+    ('revenue/contract-lines', 'revenuecontractline', models.RevenueContractLine, views.RevenueContractLineListView, views.RevenueContractLineEditView, views.RevenueContractLineDeleteView),
+    ('revenue/billing-rules', 'revenuebillingrule', models.RevenueBillingRule, views.RevenueBillingRuleListView, views.RevenueBillingRuleEditView, views.RevenueBillingRuleDeleteView),
+    ('revenue/billing-segments', 'revenuebillingsegment', models.RevenueBillingSegment, views.RevenueBillingSegmentListView, views.RevenueBillingSegmentEditView, views.RevenueBillingSegmentDeleteView),
+    ('revenue/receivable-plans', 'revenuereceivableplan', models.RevenueReceivablePlan, views.RevenueReceivablePlanListView, views.RevenueReceivablePlanEditView, views.RevenueReceivablePlanDeleteView),
+    ('revenue/receivable-plan-versions', 'revenuereceivableplanversion', models.RevenueReceivablePlanVersion, views.RevenueReceivablePlanVersionListView, views.RevenueReceivablePlanVersionEditView, views.RevenueReceivablePlanVersionDeleteView),
+    ('revenue/trigger-records', 'revenuetriggerrecord', models.RevenueTriggerRecord, views.RevenueTriggerRecordListView, views.RevenueTriggerRecordEditView, views.RevenueTriggerRecordDeleteView),
+    ('revenue/adjustment-records', 'revenueadjustmentrecord', models.RevenueAdjustmentRecord, views.RevenueAdjustmentRecordListView, views.RevenueAdjustmentRecordEditView, views.RevenueAdjustmentRecordDeleteView),
+    ('revenue/receivable-bills', 'revenuereceivablebill', models.RevenueReceivableBill, views.RevenueReceivableBillListView, views.RevenueReceivableBillEditView, views.RevenueReceivableBillDeleteView),
+    ('revenue/receivable-lines', 'revenuereceivableline', models.RevenueReceivableLine, views.RevenueReceivableLineListView, views.RevenueReceivableLineEditView, views.RevenueReceivableLineDeleteView),
+    ('revenue/invoices', 'revenueinvoice', models.RevenueInvoice, views.RevenueInvoiceListView, views.RevenueInvoiceEditView, views.RevenueInvoiceDeleteView),
+    ('revenue/invoice-lines', 'revenueinvoiceline', models.RevenueInvoiceLine, views.RevenueInvoiceLineListView, views.RevenueInvoiceLineEditView, views.RevenueInvoiceLineDeleteView),
+    ('revenue/invoice-mappings', 'revenueinvoicemapping', models.RevenueInvoiceMapping, views.RevenueInvoiceMappingListView, views.RevenueInvoiceMappingEditView, views.RevenueInvoiceMappingDeleteView),
+    ('revenue/receipts', 'revenuereceipt', models.RevenueReceipt, views.RevenueReceiptListView, views.RevenueReceiptEditView, views.RevenueReceiptDeleteView),
+    ('revenue/receipt-allocations', 'revenuereceiptallocation', models.RevenueReceiptAllocation, views.RevenueReceiptAllocationListView, views.RevenueReceiptAllocationEditView, views.RevenueReceiptAllocationDeleteView),
+    ('revenue/sync-logs', 'revenuesynclog', models.RevenueSyncLog, views.RevenueSyncLogListView, views.RevenueSyncLogEditView, views.RevenueSyncLogDeleteView),
+]
+
+for _prefix, _name, _model, _list_view, _edit_view, _delete_view in _REVENUE_URL_SPECS:
+    _detail_view = getattr(views, f'{_model.__name__}View')
+    urlpatterns += [
+        path(f'{_prefix}/', _list_view.as_view(), name=f'{_name}_list'),
+        path(f'{_prefix}/add/', _edit_view.as_view(), name=f'{_name}_add'),
+        path(f'{_prefix}/<int:pk>/', _detail_view.as_view(), name=_name),
+        path(f'{_prefix}/<int:pk>/edit/', _edit_view.as_view(), name=f'{_name}_edit'),
+        path(f'{_prefix}/<int:pk>/delete/', _delete_view.as_view(), name=f'{_name}_delete'),
+        path(f'{_prefix}/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name=f'{_name}_changelog', kwargs={'model': _model}),
+    ]

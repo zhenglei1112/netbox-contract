@@ -1,0 +1,101 @@
+{% extends 'generic/object.html' %}
+{% load plugins %}
+{% load i18n %}
+{% block content %}
+{% with ws=revenue_contract_workspace overview=revenue_contract_workspace.overview %}
+<style>
+  .rev-switch { display:flex; gap:.5rem; margin-bottom:1rem; }
+  .rev-switch a { padding:.35rem .7rem; border:1px solid var(--tblr-border-color); border-radius:.35rem; text-decoration:none; }
+  .rev-switch .active { background:var(--tblr-primary); color:#fff; border-color:var(--tblr-primary); }
+  .viz-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; }
+  .viz-card { border:1px solid var(--tblr-border-color); border-radius:.45rem; padding:1rem; background:var(--tblr-bg-surface); }
+  .viz-label { color:var(--tblr-secondary); font-size:.82rem; }
+  .viz-value { font-size:1.35rem; font-weight:650; margin:.2rem 0 .6rem; }
+  .viz-bar { height:.7rem; background:var(--tblr-bg-surface-secondary); border-radius:999px; overflow:hidden; }
+  .viz-fill { height:100%; background:var(--tblr-primary); border-radius:999px; }
+  .viz-fill.green { background:#16a34a; }
+  .viz-fill.orange { background:#d97706; }
+  .viz-flow { display:grid; grid-template-columns: repeat(4, 1fr); gap:.75rem; align-items:stretch; }
+  .viz-step { border:1px solid var(--tblr-border-color); border-radius:.45rem; padding:1rem; position:relative; background:#fff; }
+  .viz-step:after { content:'>'; position:absolute; right:-.6rem; top:45%; color:var(--tblr-secondary); font-weight:700; }
+  .viz-step:last-child:after { display:none; }
+  .viz-step-title { color:var(--tblr-secondary); font-size:.8rem; }
+  .viz-step-value { font-size:1.1rem; font-weight:650; margin-top:.25rem; }
+  .viz-table th,.viz-table td { font-size:.85rem; vertical-align:middle; }
+  .viz-stage-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:.75rem; }
+  .viz-stage { border:1px solid var(--tblr-border-color); border-radius:.45rem; padding:.9rem; background:#fff; }
+  .viz-stage-title { font-weight:700; margin-bottom:.25rem; }
+
+
+  .viz-calendar { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:.75rem; }
+  .viz-month { border:1px solid var(--tblr-border-color); border-radius:.45rem; padding:.85rem; background:#fff; }
+  .viz-month .top { display:flex; justify-content:space-between; gap:.5rem; margin-bottom:.55rem; }
+  .viz-month-title { font-weight:700; }
+  .viz-month-status { color:var(--tblr-secondary); font-size:.78rem; }
+  .viz-mini-row { display:grid; grid-template-columns:3.5rem 1fr 3rem; gap:.5rem; align-items:center; font-size:.78rem; margin:.35rem 0; }</style>
+<div class="rev-switch">
+  <a href="{{ object.get_absolute_url }}">&#31532;&#19968;&#29256;&#65306;&#20840;&#38142;&#36335;&#29256;</a>
+  <a class="active" href="{% url 'plugins:netbox_contract:revenuecontract_visual' pk=object.pk %}">&#31532;&#20108;&#29256;&#65306;&#21487;&#35270;&#21270;&#36816;&#33829;&#29256;</a>
+  <a href="{% url 'plugins:netbox_contract:revenuecontract_executive' pk=object.pk %}">&#31532;&#19977;&#29256;&#65306;&#39046;&#23548;&#23457;&#26597;&#29256;</a>
+  <a href="{% url 'plugins:netbox_contract:revenuecontract_generate_receivables' pk=object.pk %}">&#29983;&#25104;&#24212;&#25910;</a>
+</div>
+<div class="card mb-3">
+  <div class="card-header"><h5 class="card-title mb-0">{{ object }} &#25191;&#34892;&#20840;&#26223;</h5></div>
+  <div class="card-body">
+    <div class="viz-flow">
+      <div class="viz-step"><div class="viz-step-title">&#21512;&#21516;&#37329;&#39069;</div><div class="viz-step-value">{{ overview.contract_amount }}</div></div>
+      <div class="viz-step"><div class="viz-step-title">&#24050;&#24418;&#25104;&#24212;&#25910;</div><div class="viz-step-value">{{ overview.receivable_total }}</div><div class="viz-label">{{ overview.receivable_rate }}</div></div>
+      <div class="viz-step"><div class="viz-step-title">&#24050;&#24320;&#31080;</div><div class="viz-step-value">{{ overview.invoiced_total }}</div><div class="viz-label">{{ overview.invoice_rate }}</div></div>
+      <div class="viz-step"><div class="viz-step-title">&#24050;&#22238;&#27454;</div><div class="viz-step-value">{{ overview.receipt_total }}</div><div class="viz-label">{{ overview.receipt_rate }}</div></div>
+    </div>
+  </div>
+</div>
+
+{% if ws.timeline.is_stage_contract %}
+<div class="card mb-3">
+  <h5 class="card-header">&#38454;&#27573;&#25910;&#27454;&#36827;&#24230;&#22270;</h5>
+  <div class="card-body"><div class="viz-stage-grid">
+    {% for node in ws.timeline.nodes %}
+    <div class="viz-stage">
+      <div class="viz-stage-title">{{ node.index }}. {{ node.stage_name }}</div>
+      <div class="viz-label">{{ node.status_label }} / {{ node.trigger_label }} / {{ node.planned_date_label }}</div>
+      <div class="viz-mini-row"><span>&#24212;&#25910;</span><div class="viz-bar"><div class="viz-fill" style="width:{{ node.receivable_rate_value }}%"></div></div><span>{{ node.receivable_rate }}</span></div>
+      <div class="viz-mini-row"><span>&#24320;&#31080;</span><div class="viz-bar"><div class="viz-fill orange" style="width:{{ node.invoice_rate_value }}%"></div></div><span>{{ node.invoice_rate }}</span></div>
+      <div class="viz-mini-row"><span>&#22238;&#27454;</span><div class="viz-bar"><div class="viz-fill green" style="width:{{ node.receipt_rate_value }}%"></div></div><span>{{ node.receipt_rate }}</span></div>
+      <div class="viz-label">&#35745;&#21010; {{ node.planned_amount }} / &#26410;&#22238; {{ node.unreceived_total }}</div>
+    </div>
+    {% empty %}<div class="text-muted">&#26410;&#37197;&#32622;&#38454;&#27573;&#24615;&#35745;&#36153;&#35268;&#21017;&#12290;</div>{% endfor %}
+  </div></div>
+</div>
+{% endif %}
+<div class="card mb-3">
+  <h5 class="card-header">&#24212;&#25910;&#36134;&#26399;&#21487;&#35270;&#21270;&#26085;&#21382;</h5>
+  <div class="card-body">
+    <div class="viz-calendar">
+      {% for month in ws.calendar.months %}
+      <div class="viz-month">
+        <div class="top"><div class="viz-month-title">{{ month.month_label }}</div><div class="viz-month-status">{{ month.status_label }}</div></div>
+        <div class="viz-mini-row"><span>&#24212;&#25910;</span><div class="viz-bar"><div class="viz-fill" style="width:{% if month.bill_count %}100{% else %}0{% endif %}%"></div></div><span>{{ month.bill_count }}</span></div>
+        <div class="viz-mini-row"><span>&#24320;&#31080;</span><div class="viz-bar"><div class="viz-fill orange" style="width:{{ month.invoice_rate_value }}%"></div></div><span>{{ month.invoice_rate }}</span></div>
+        <div class="viz-mini-row"><span>&#22238;&#27454;</span><div class="viz-bar"><div class="viz-fill green" style="width:{{ month.receipt_rate_value }}%"></div></div><span>{{ month.receipt_rate }}</span></div>
+        <div class="viz-label">&#24212;&#25910; {{ month.receivable_total }} / &#26410;&#22238; {{ month.unreceived_total }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="viz-grid mb-3">
+  <div class="viz-card"><div class="viz-label">&#24212;&#25910;&#24418;&#25104;&#36827;&#24230;</div><div class="viz-value">{{ overview.receivable_rate }}</div><div class="viz-bar"><div class="viz-fill" style="width: {{ overview.receivable_rate }}"></div></div></div>
+  <div class="viz-card"><div class="viz-label">&#24320;&#31080;&#36827;&#24230;</div><div class="viz-value">{{ overview.invoice_rate }}</div><div class="viz-bar"><div class="viz-fill orange" style="width: {{ overview.invoice_rate }}"></div></div></div>
+  <div class="viz-card"><div class="viz-label">&#22238;&#27454;&#36827;&#24230;</div><div class="viz-value">{{ overview.receipt_rate }}</div><div class="viz-bar"><div class="viz-fill green" style="width: {{ overview.receipt_rate }}"></div></div></div>
+  <div class="viz-card"><div class="viz-label">&#24453;&#22788;&#29702;&#26126;&#32454;</div><div class="viz-value">{{ overview.open_item_count }}</div><div class="viz-label">&#26410;&#24320;&#31080;&#25110;&#26410;&#22238;&#27454;&#30340;&#24212;&#25910;&#26126;&#32454;</div></div>
+</div>
+<div class="row mb-3">
+  <div class="col col-md-6"><div class="card"><h5 class="card-header">&#22238;&#27454;&#27969;&#27700;&#35270;&#22270;</h5><table class="table table-hover viz-table"><thead><tr><th>&#27969;&#27700;</th><th>&#21040;&#36134;&#37329;&#39069;</th><th>&#24050;&#20998;&#37197;</th><th>&#36827;&#24230;</th></tr></thead><tbody>{% for group in ws.receipt_groups %}<tr><td><a href="{{ group.url }}">{{ group.receipt.bank_flow_no }}</a></td><td>{{ group.receipt.amount }}</td><td>{{ group.receipt.allocated_total }}</td><td><div class="viz-bar"><div class="viz-fill green" style="width: {{ group.allocation_rate }}"></div></div></td></tr>{% empty %}<tr><td colspan="4" class="text-muted">&#26242;&#26080;&#22238;&#27454;</td></tr>{% endfor %}</tbody></table></div></div>
+  <div class="col col-md-6"><div class="card"><h5 class="card-header">&#39118;&#38505;&#32570;&#21475;</h5><table class="table table-hover viz-table"><tr><th>&#21512;&#21516;&#26410;&#24418;&#25104;&#24212;&#25910;</th><td>{{ overview.contract_gap }}</td></tr><tr><th>&#26410;&#24320;&#31080;</th><td>{{ overview.uninvoiced_total }}</td></tr><tr><th>&#26410;&#22238;&#27454;</th><td>{{ overview.unreceived_total }}</td></tr></table></div></div>
+</div>
+<div class="card mb-3"><h5 class="card-header">&#20840;&#38142;&#36335;&#26126;&#32454;</h5><div class="table-responsive"><table class="table table-hover viz-table"><thead><tr><th>&#21512;&#21516;&#39033;</th><th>&#36134;&#26399;</th><th>&#24212;&#25910;</th><th>&#24320;&#31080;</th><th>&#22238;&#27454;</th><th>&#26410;&#22238;</th></tr></thead><tbody>{% for row in ws.chain_rows %}<tr><td><a href="{{ row.contract_line_url }}">{{ row.contract_line }}</a></td><td>{{ row.billing_period }}</td><td>{{ row.net_amount }}</td><td>{{ row.mapped_amount }}</td><td>{{ row.receipted_amount }}</td><td>{{ row.unreceived_amount }}</td></tr>{% empty %}<tr><td colspan="6" class="text-muted">&#26242;&#26080;&#24212;&#25910;&#26126;&#32454;</td></tr>{% endfor %}</tbody></table></div></div>
+{% endwith %}
+{% plugin_right_page object %}
+{% endblock content %}

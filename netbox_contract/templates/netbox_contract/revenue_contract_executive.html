@@ -1,0 +1,91 @@
+{% extends 'generic/object.html' %}
+{% load plugins %}
+{% load i18n %}
+{% block content %}
+{% with ws=revenue_contract_workspace overview=revenue_contract_workspace.overview %}
+<style>
+  .exec-switch { display:flex; gap:.5rem; margin-bottom:1rem; }
+  .exec-switch a { padding:.35rem .7rem; border:1px solid var(--tblr-border-color); border-radius:.35rem; text-decoration:none; }
+  .exec-switch .active { background:var(--tblr-primary); color:#fff; border-color:var(--tblr-primary); }
+  .exec-hero { border:1px solid var(--tblr-border-color); border-left:5px solid var(--tblr-primary); border-radius:.35rem; padding:1rem; background:var(--tblr-bg-surface); }
+  .exec-title { font-size:1.25rem; font-weight:700; margin:0 0 .35rem; }
+  .exec-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:.75rem; }
+  .exec-metric { border:1px solid var(--tblr-border-color); border-radius:.35rem; padding:.8rem; background:#fff; }
+  .exec-metric .label { color:var(--tblr-secondary); font-size:.78rem; }
+  .exec-metric .value { font-size:1.25rem; font-weight:700; margin-top:.25rem; }
+  .exec-section h5 { margin:0; }
+  .exec-table th,.exec-table td { font-size:.88rem; vertical-align:middle; }
+  .exec-risk { border-left:4px solid #d97706; padding:.65rem .8rem; background:#fff7ed; margin-bottom:.5rem; }
+  .exec-stage-list { display:grid; gap:.5rem; }
+  .exec-stage-row { display:grid; grid-template-columns:2rem 1fr 6rem 7rem 7rem; gap:.6rem; align-items:center; border:1px solid var(--tblr-border-color); border-left:4px solid var(--tblr-border-color); border-radius:.35rem; padding:.55rem .7rem; background:#fff; }
+  .exec-stage-row.success { border-left-color:#16a34a; }
+  .exec-stage-row.info { border-left-color:#2563eb; }
+  .exec-stage-row.warning { border-left-color:#d97706; }
+  .exec-stage-row.danger { border-left-color:#dc2626; }
+  .exec-stage-row.muted { opacity:.72; }
+
+
+  .exec-calendar { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.6rem; }
+  .exec-month { border:1px solid var(--tblr-border-color); border-radius:.35rem; padding:.65rem; background:#fff; }
+  .exec-month.success { border-left:4px solid #16a34a; }
+  .exec-month.info { border-left:4px solid #2563eb; }
+  .exec-month.warning { border-left:4px solid #d97706; }
+  .exec-month.danger { border-left:4px solid #dc2626; }
+  .exec-month.muted { opacity:.65; }
+  .exec-month-title { font-weight:700; }
+  .exec-month-status { font-size:.78rem; color:var(--tblr-secondary); margin:.15rem 0 .4rem; }
+  .exec-month-amount { font-size:.9rem; }</style>
+<div class="exec-switch">
+  <a href="{{ object.get_absolute_url }}">&#31532;&#19968;&#29256;&#65306;&#20840;&#38142;&#36335;&#29256;</a>
+  <a href="{% url 'plugins:netbox_contract:revenuecontract_visual' pk=object.pk %}">&#31532;&#20108;&#29256;&#65306;&#21487;&#35270;&#21270;&#36816;&#33829;&#29256;</a>
+  <a class="active" href="{% url 'plugins:netbox_contract:revenuecontract_executive' pk=object.pk %}">&#31532;&#19977;&#29256;&#65306;&#39046;&#23548;&#23457;&#26597;&#29256;</a>
+</div>
+<div class="exec-hero mb-3"><div class="exec-title">{{ object }} &#39046;&#23548;&#23457;&#26597;&#25688;&#35201;</div><div class="text-muted">&#26412;&#39029;&#20165;&#20445;&#30041;&#23457;&#26597;&#38656;&#35201;&#30340;&#32467;&#35770;&#12289;&#37329;&#39069;&#32570;&#21475;&#12289;&#39118;&#38505;&#28857;&#21644;&#24453;&#20915;&#31574;&#39033;&#12290;</div></div>
+<div class="exec-grid mb-3">
+  <div class="exec-metric"><div class="label">&#21512;&#21516;&#37329;&#39069;</div><div class="value">{{ overview.contract_amount }}</div></div>
+  <div class="exec-metric"><div class="label">&#24212;&#25910;&#24418;&#25104;</div><div class="value">{{ overview.receivable_total }}</div><div class="text-muted">{{ overview.receivable_rate }}</div></div>
+  <div class="exec-metric"><div class="label">&#24320;&#31080;&#23436;&#25104;</div><div class="value">{{ overview.invoiced_total }}</div><div class="text-muted">{{ overview.invoice_rate }}</div></div>
+  <div class="exec-metric"><div class="label">&#22238;&#27454;&#23436;&#25104;</div><div class="value">{{ overview.receipt_total }}</div><div class="text-muted">{{ overview.receipt_rate }}</div></div>
+  <div class="exec-metric"><div class="label">&#26410;&#22238;&#27454;</div><div class="value">{{ overview.unreceived_total }}</div></div>
+  <div class="exec-metric"><div class="label">&#24453;&#20851;&#27880;&#26126;&#32454;</div><div class="value">{{ overview.open_item_count }}</div></div>
+</div>
+
+{% if ws.timeline.is_stage_contract %}
+<div class="card mb-3">
+  <h5 class="card-header">&#38454;&#27573;&#25910;&#27454;&#23457;&#26597;&#28165;&#21333;</h5>
+  <div class="card-body"><div class="exec-stage-list">
+    {% for node in ws.timeline.nodes %}
+    <div class="exec-stage-row {{ node.risk_level }}">
+      <div>{{ node.index }}</div><div><strong>{{ node.stage_name }}</strong><div class="text-muted">{{ node.trigger_label }} / {{ node.planned_date_label }}</div></div><div>{{ node.status_label }}</div><div>&#35745;&#21010; {{ node.planned_amount }}</div><div>&#26410;&#22238; {{ node.unreceived_total }}</div>
+    </div>
+    {% empty %}<div class="text-muted">&#26410;&#37197;&#32622;&#38454;&#27573;&#24615;&#35745;&#36153;&#35268;&#21017;&#12290;</div>{% endfor %}
+  </div></div>
+</div>
+{% endif %}
+<div class="card mb-3">
+  <h5 class="card-header">{{ ws.calendar.year }}&#24180;&#24212;&#25910;&#23653;&#32422;&#23457;&#26597;&#26085;&#21382;</h5>
+  <div class="card-body">
+    <div class="exec-calendar">
+      {% for month in ws.calendar.months %}
+      <div class="exec-month {{ month.risk_level }}">
+        <div class="exec-month-title">{{ month.month }}&#26376;</div>
+        <div class="exec-month-status">{{ month.status_label }}</div>
+        <div class="exec-month-amount">&#24212;&#25910;&#65306;{{ month.receivable_total }}</div>
+        <div class="exec-month-amount">&#22238;&#27454;&#29575;&#65306;{{ month.receipt_rate }}</div>
+        <div class="text-muted">{{ month.risk_label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col col-md-5"><div class="card exec-section"><h5 class="card-header">&#23457;&#26597;&#32467;&#35770;</h5><div class="card-body"><p><strong>&#21512;&#21516;&#25191;&#34892;&#65306;</strong> &#24050;&#24418;&#25104;&#24212;&#25910; {{ overview.receivable_rate }}&#12290;</p><p><strong>&#24320;&#31080;&#25191;&#34892;&#65306;</strong> &#24050;&#24320;&#31080; {{ overview.invoice_rate }}&#65292;&#26410;&#24320;&#31080; {{ overview.uninvoiced_total }}&#12290;</p><p><strong>&#22238;&#27454;&#25191;&#34892;&#65306;</strong> &#24050;&#22238;&#27454; {{ overview.receipt_rate }}&#65292;&#26410;&#22238;&#27454; {{ overview.unreceived_total }}&#12290;</p></div></div></div>
+  <div class="col col-md-7"><div class="card exec-section"><h5 class="card-header">&#37325;&#28857;&#39118;&#38505;&#19982;&#24453;&#20915;&#31574;</h5><div class="card-body">{% if overview.contract_gap %}<div class="exec-risk">&#21512;&#21516;&#37329;&#39069;&#19982;&#24050;&#24418;&#25104;&#24212;&#25910;&#23384;&#22312;&#24046;&#39069;&#65306;{{ overview.contract_gap }}</div>{% endif %}{% if overview.uninvoiced_total %}<div class="exec-risk">&#23384;&#22312;&#26410;&#24320;&#31080;&#24212;&#25910;&#65306;{{ overview.uninvoiced_total }}</div>{% endif %}{% if overview.unreceived_total %}<div class="exec-risk">&#23384;&#22312;&#26410;&#22238;&#27454;&#37329;&#39069;&#65306;{{ overview.unreceived_total }}</div>{% endif %}{% if not overview.contract_gap and not overview.uninvoiced_total and not overview.unreceived_total %}<div class="text-muted">&#26242;&#26080;&#37325;&#22823;&#37329;&#39069;&#32570;&#21475;&#12290;</div>{% endif %}</div></div></div>
+  <a href="{% url 'plugins:netbox_contract:revenuecontract_generate_receivables' pk=object.pk %}">&#29983;&#25104;&#24212;&#25910;</a>
+</div>
+<div class="card mb-3"><h5 class="card-header">&#39046;&#23548;&#23457;&#26597;&#28165;&#21333;</h5><div class="table-responsive"><table class="table table-hover exec-table"><thead><tr><th>&#24207;&#21495;</th><th>&#23457;&#26597;&#39033;</th><th>&#24403;&#21069;&#20540;</th><th>&#21028;&#26029;</th></tr></thead><tbody><tr><td>1</td><td>&#21512;&#21516;&#37329;&#39069;&#26159;&#21542;&#24050;&#24418;&#25104;&#24212;&#25910;</td><td>{{ overview.receivable_total }} / {{ overview.contract_amount }}</td><td>{{ overview.receivable_rate }}</td></tr><tr><td>2</td><td>&#24212;&#25910;&#26159;&#21542;&#24050;&#24320;&#31080;</td><td>{{ overview.invoiced_total }} / {{ overview.receivable_total }}</td><td>{{ overview.invoice_rate }}</td></tr><tr><td>3</td><td>&#24212;&#25910;&#26159;&#21542;&#24050;&#22238;&#27454;</td><td>{{ overview.receipt_total }} / {{ overview.receivable_total }}</td><td>{{ overview.receipt_rate }}</td></tr><tr><td>4</td><td>&#26159;&#21542;&#23384;&#22312;&#26410;&#23436;&#25104;&#26126;&#32454;</td><td>{{ overview.open_item_count }}</td><td>{% if overview.open_item_count %}&#38656;&#20851;&#27880;{% else %}&#27491;&#24120;{% endif %}</td></tr></tbody></table></div></div>
+<div class="card mb-3"><h5 class="card-header">&#26410;&#23436;&#25104;&#26126;&#32454;</h5><div class="table-responsive"><table class="table table-hover exec-table"><thead><tr><th>&#21512;&#21516;&#39033;</th><th>&#36134;&#26399;</th><th>&#24212;&#25910;</th><th>&#26410;&#24320;&#31080;</th><th>&#26410;&#22238;&#27454;</th></tr></thead><tbody>{% for row in ws.chain_rows %}{% if row.unreceived_amount or row.uninvoiced_amount %}<tr><td><a href="{{ row.contract_line_url }}">{{ row.contract_line }}</a></td><td>{{ row.billing_period }}</td><td>{{ row.net_amount }}</td><td>{{ row.uninvoiced_amount }}</td><td>{{ row.unreceived_amount }}</td></tr>{% endif %}{% empty %}<tr><td colspan="5" class="text-muted">&#26242;&#26080;&#24212;&#25910;&#26126;&#32454;</td></tr>{% endfor %}</tbody></table></div></div>
+{% endwith %}
+{% plugin_right_page object %}
+{% endblock content %}

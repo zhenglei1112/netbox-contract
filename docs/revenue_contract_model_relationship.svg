@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1880" height="1320" viewBox="0 0 1880 1320">
+<defs>
+<marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2,2 L10,6 L2,10 Z" fill="#4b5563"/></marker>
+<filter id="shadow" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.14"/></filter>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="60" y="34" font-family="Microsoft YaHei, SimHei, Arial" font-size="26" font-weight="700" fill="#111827">收入合同模型关系图</text>
+<rect x="50" y="40" width="520" height="135" rx="14" fill="#edf7ff" stroke="#d1d5db" stroke-width="1"/>
+<text x="66" y="70" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">åºç¡å¯¹è±¡</text>
+<rect x="190" y="175" width="690" height="425" rx="14" fill="#f3f8ee" stroke="#d1d5db" stroke-width="1"/>
+<text x="206" y="205" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">ååç»æ</text>
+<rect x="190" y="465" width="1030" height="755" rx="14" fill="#fff7e8" stroke="#d1d5db" stroke-width="1"/>
+<text x="206" y="495" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">è®¡è´¹ä¸åºæ¶</text>
+<rect x="190" y="815" width="1030" height="935" rx="14" fill="#f7efff" stroke="#d1d5db" stroke-width="1"/>
+<text x="206" y="845" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">åç¥¨ä¸æ å°</text>
+<rect x="190" y="1000" width="1390" height="1128" rx="14" fill="#eefaf5" stroke="#d1d5db" stroke-width="1"/>
+<text x="206" y="1030" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">åæ¬¾ä¸é¢æ¶</text>
+<rect x="190" y="1150" width="670" height="1280" rx="14" fill="#fff0f0" stroke="#d1d5db" stroke-width="1"/>
+<text x="206" y="1180" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">è°æ´</text>
+<rect x="1280" y="175" width="300" height="130" rx="14" fill="#f5f5f5" stroke="#d1d5db" stroke-width="1"/>
+<text x="1296" y="205" font-family="Microsoft YaHei, SimHei, Arial" font-size="17" font-weight="700" fill="#374151">åæ­¥å®¡è®¡</text>
+<path d="M270.0,113.0 L360.0,113.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="263.0" y="101.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="315.0" y="117.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">å®¢æ·é¡¹ç®</text>
+<path d="M175.0,146.0 L340.0,210.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="205.5" y="166.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="257.5" y="182.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">å®¢æ·åå</text>
+<path d="M450.0,246.0 L600.0,246.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="234.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="250.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">ååå³è</text>
+<path d="M455.0,146.0 L720.0,210.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="535.5" y="166.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="587.5" y="182.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">é¡¹ç®å³è</text>
+<path d="M340.0,282.0 L340.0,350.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="288.0" y="304.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="340.0" y="320.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">ååçæ¬</text>
+<path d="M340.0,282.0 L340.0,500.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="288.0" y="379.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="340.0" y="395.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">ååé¡¹</text>
+<path d="M340.0,422.0 L340.0,500.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="288.0" y="449.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="340.0" y="465.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">çæ¬é¡¹</text>
+<path d="M455.0,146.0 L340.0,500.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="345.5" y="311.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="397.5" y="327.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">é¡¹ç®é¡¹</text>
+<path d="M450.0,536.0 L600.0,536.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="524.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="540.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">è®¡è´¹è§å</text>
+<path d="M340.0,422.0 L710.0,500.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="449.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="465.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">çæ¬è§å</text>
+<path d="M820.0,536.0 L960.0,536.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="838.0" y="524.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="890.0" y="540.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">è®¡è´¹åæ®µ</text>
+<path d="M450.0,536.0 L960.0,536.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="653.0" y="524.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="705.0" y="540.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">åæ®µå½å±</text>
+<path d="M340.0,282.0 L340.0,675.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="288.0" y="466.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="340.0" y="482.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">äº§çåºæ¶</text>
+<path d="M455.0,146.0 L340.0,675.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="345.5" y="398.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="397.5" y="414.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">é¡¹ç®åºæ¶</text>
+<path d="M450.0,711.0 L600.0,711.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="699.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="715.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">è´¦åæç»</text>
+<path d="M340.0,572.0 L710.0,675.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="611.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="627.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">ååé¡¹æ¥æº</text>
+<path d="M710.0,572.0 L710.0,675.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="658.0" y="611.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="710.0" y="627.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">è§åæ¥æº</text>
+<path d="M450.0,886.0 L600.0,886.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="874.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="890.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">åç¥¨æç»</text>
+<path d="M710.0,747.0 L1070.0,850.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="838.0" y="786.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="890.0" y="802.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">åºæ¶æ å°</text>
+<path d="M820.0,886.0 L960.0,886.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="838.0" y="874.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="890.0" y="890.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">åç¥¨æ å°</text>
+<path d="M450.0,1076.0 L600.0,1076.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="1064.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="1080.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">åæ¬¾åé</text>
+<path d="M710.0,747.0 L710.0,1040.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="658.0" y="881.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="710.0" y="897.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">æ ¸éåºæ¶</text>
+<path d="M1070.0,922.0 L710.0,1040.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="838.0" y="969.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="890.0" y="985.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">æåç¥¨æ å°</text>
+<path d="M960.0,1076.0 L820.0,1076.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="838.0" y="1064.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="890.0" y="1080.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">å­å¥é¢æ¶</text>
+<path d="M1180.0,1076.0 L1320.0,1076.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="1198.0" y="1064.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="1250.0" y="1080.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">é¢æ¶åæ¨</text>
+<path d="M710.0,747.0 L1430.0,1040.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="1018.0" y="881.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="1070.0" y="897.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">åæ¨æ ¸é</text>
+<path d="M1070.0,922.0 L1430.0,1040.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="1198.0" y="969.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="1250.0" y="985.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">æåç¥¨æ å°</text>
+<path d="M340.0,282.0 L1070.0,1040.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="653.0" y="649.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="705.0" y="665.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">ååé¢æ¶</text>
+<path d="M340.0,282.0 L340.0,1190.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="288.0" y="724.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="340.0" y="740.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">ååè°æ´</text>
+<path d="M450.0,1226.0 L600.0,1226.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="473.0" y="1214.0" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="525.0" y="1230.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">è°æ´åæ</text>
+<path d="M710.0,747.0 L710.0,1190.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)" opacity="0.72"/>
+<rect x="658.0" y="956.5" width="104" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+<text x="710.0" y="972.5" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="12" fill="#374151">è°æ´æç»</text>
+<rect x="80" y="80" width="190" height="66" rx="10" fill="#ffffff" stroke="#0ea5a3" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="80" y="80" width="8" height="66" rx="4" fill="#0ea5a3"/>
+<text x="175.0" y="121.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">å®¢æ·</text>
+<rect x="360" y="80" width="190" height="66" rx="10" fill="#ffffff" stroke="#0284c7" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="360" y="80" width="8" height="66" rx="4" fill="#0284c7"/>
+<text x="455.0" y="121.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">é¡¹ç®</text>
+<rect x="230" y="210" width="220" height="72" rx="10" fill="#ffffff" stroke="#16a34a" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="210" width="8" height="72" rx="4" fill="#16a34a"/>
+<text x="340.0" y="254.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">æ¶å¥åå</text>
+<rect x="600" y="210" width="240" height="72" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="600" y="210" width="8" height="72" rx="4" fill="#64748b"/>
+<text x="720.0" y="254.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">ååé¡¹ç®å³è</text>
+<rect x="230" y="350" width="220" height="72" rx="10" fill="#ffffff" stroke="#22c55e" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="350" width="8" height="72" rx="4" fill="#22c55e"/>
+<text x="340.0" y="394.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">ååçæ¬</text>
+<rect x="230" y="500" width="220" height="72" rx="10" fill="#ffffff" stroke="#65a30d" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="500" width="8" height="72" rx="4" fill="#65a30d"/>
+<text x="340.0" y="544.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">ååé¡¹</text>
+<rect x="600" y="500" width="220" height="72" rx="10" fill="#ffffff" stroke="#f59e0b" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="600" y="500" width="8" height="72" rx="4" fill="#f59e0b"/>
+<text x="710.0" y="544.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">è®¡è´¹è§å</text>
+<rect x="960" y="500" width="220" height="72" rx="10" fill="#ffffff" stroke="#d97706" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="960" y="500" width="8" height="72" rx="4" fill="#d97706"/>
+<text x="1070.0" y="544.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">è®¡è´¹åæ®µ</text>
+<rect x="230" y="675" width="220" height="72" rx="10" fill="#ffffff" stroke="#ca8a04" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="675" width="8" height="72" rx="4" fill="#ca8a04"/>
+<text x="340.0" y="719.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åºæ¶è´¦å</text>
+<rect x="600" y="675" width="220" height="72" rx="10" fill="#ffffff" stroke="#eab308" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="600" y="675" width="8" height="72" rx="4" fill="#eab308"/>
+<text x="710.0" y="719.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åºæ¶æç»</text>
+<rect x="230" y="850" width="220" height="72" rx="10" fill="#ffffff" stroke="#7c3aed" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="850" width="8" height="72" rx="4" fill="#7c3aed"/>
+<text x="340.0" y="894.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åç¥¨</text>
+<rect x="600" y="850" width="220" height="72" rx="10" fill="#ffffff" stroke="#8b5cf6" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="600" y="850" width="8" height="72" rx="4" fill="#8b5cf6"/>
+<text x="710.0" y="894.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åç¥¨æç»</text>
+<rect x="960" y="850" width="220" height="72" rx="10" fill="#ffffff" stroke="#a855f7" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="960" y="850" width="8" height="72" rx="4" fill="#a855f7"/>
+<text x="1070.0" y="894.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åç¥¨æ å°</text>
+<rect x="230" y="1040" width="220" height="72" rx="10" fill="#ffffff" stroke="#059669" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="1040" width="8" height="72" rx="4" fill="#059669"/>
+<text x="340.0" y="1084.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åæ¬¾</text>
+<rect x="600" y="1040" width="220" height="72" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="600" y="1040" width="8" height="72" rx="4" fill="#10b981"/>
+<text x="710.0" y="1084.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åæ¬¾åé</text>
+<rect x="960" y="1040" width="220" height="72" rx="10" fill="#ffffff" stroke="#0891b2" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="960" y="1040" width="8" height="72" rx="4" fill="#0891b2"/>
+<text x="1070.0" y="1084.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">é¢æ¶è´¦æ·</text>
+<rect x="1320" y="1040" width="220" height="72" rx="10" fill="#ffffff" stroke="#06b6d4" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="1320" y="1040" width="8" height="72" rx="4" fill="#06b6d4"/>
+<text x="1430.0" y="1084.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">é¢æ¶åæ¨</text>
+<rect x="230" y="1190" width="220" height="72" rx="10" fill="#ffffff" stroke="#dc2626" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="230" y="1190" width="8" height="72" rx="4" fill="#dc2626"/>
+<text x="340.0" y="1234.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">è°æ´å</text>
+<rect x="600" y="1190" width="220" height="72" rx="10" fill="#ffffff" stroke="#ef4444" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="600" y="1190" width="8" height="72" rx="4" fill="#ef4444"/>
+<text x="710.0" y="1234.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">è°æ´åæ</text>
+<rect x="1320" y="210" width="220" height="72" rx="10" fill="#ffffff" stroke="#6b7280" stroke-width="2.2" filter="url(#shadow)"/>
+<rect x="1320" y="210" width="8" height="72" rx="4" fill="#6b7280"/>
+<text x="1430.0" y="254.0" text-anchor="middle" font-family="Microsoft YaHei, SimHei, Arial" font-size="24" font-weight="700" fill="#111827">åæ­¥æ¥å¿</text>
+<text x="1380" y="1268" font-family="Microsoft YaHei, SimHei, Arial" font-size="15" fill="#374151">箭头方向表示外键引用或主要业务依赖方向</text>
+</svg>

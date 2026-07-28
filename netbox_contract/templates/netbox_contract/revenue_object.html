@@ -1,0 +1,62 @@
+{% extends 'generic/object.html' %}
+{% load plugins %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+  {% if revenue_summary_cards %}
+  <div class="row mb-3">
+    {% for card in revenue_summary_cards %}
+      <div class="col col-md-2">
+        <div class="card text-center">
+          <div class="card-body py-3">
+            <div class="text-muted small">{{ card.label }}</div>
+            <div class="h4 mb-0">{{ card.value }}</div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row mb-3">
+    <div class="col col-md-8">
+      <div class="card">
+        <h5 class="card-header">{{ object }}</h5>
+        <table class="table table-hover attr-table">
+          {% for field in revenue_object_fields %}
+            <tr>
+              <th scope="row">{{ field.label }}</th>
+              <td>
+                {% if field.link %}
+                  <a href="{{ field.link }}">{{ field.value }}</a>
+                {% elif field.value is not None and field.value != '' %}
+                  {{ field.value }}
+                {% else %}
+                  <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% include 'inc/panels/custom_fields.html' %}
+    </div>
+    <div class="col col-md-4">
+      {% include 'inc/panels/tags.html' %}
+    </div>
+  </div>
+
+  {% for panel in revenue_related_panels %}
+    <div class="row mb-3">
+      <div class="col col-md-12">
+        <div class="card">
+          <h5 class="card-header">{{ panel.title }} <span class="badge text-bg-secondary">{{ panel.count }}</span></h5>
+          {% render_table panel.table %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+{% plugin_right_page object %}
+{% endblock content %}

@@ -58,3 +58,27 @@ class AccountingDimensionViewSet(NetBoxModelViewSet):
 class ContractTypeViewSet(NetBoxModelViewSet):
     queryset = models.ContractType.objects.prefetch_related('tags')
     serializer_class = ContractTypeSerializer
+
+
+_REVENUE_VIEWSET_MODELS = [
+    models.RevenueCustomer, models.RevenueProject, models.RevenueContract, models.RevenueContractProject,
+    models.RevenueOrder, models.RevenueContractVersion, models.RevenueContractLine, models.RevenueBillingRule,
+    models.RevenueBillingSegment, models.RevenueReceivablePlan, models.RevenueReceivablePlanVersion,
+    models.RevenueTriggerRecord, models.RevenueAdjustmentRecord, models.RevenueReceivableBill,
+    models.RevenueReceivableLine,
+    models.RevenueInvoice,
+    models.RevenueInvoiceLine, models.RevenueInvoiceMapping, models.RevenueReceipt,
+    models.RevenueReceiptAllocation,
+    models.RevenueSyncLog,
+]
+
+for _revenue_model in _REVENUE_VIEWSET_MODELS:
+    globals()[f'{_revenue_model.__name__}ViewSet'] = type(
+        f'{_revenue_model.__name__}ViewSet',
+        (NetBoxModelViewSet,),
+        {
+            'queryset': _revenue_model.objects.prefetch_related('tags'),
+            'serializer_class': getattr(__import__('netbox_contract.api.serializers', fromlist=[f'{_revenue_model.__name__}Serializer']), f'{_revenue_model.__name__}Serializer'),
+            'filterset_class': getattr(filtersets, f'{_revenue_model.__name__}FilterSet'),
+        },
+    )

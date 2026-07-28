@@ -1,0 +1,208 @@
+{% extends 'generic/_base.html' %}
+{% load humanize %}
+
+{% block title %}应收总览{% endblock %}
+
+{% block controls %}
+  <form method="get" class="rev-filter-controls" id="revenue-overview-filters" aria-label="应收总览筛选">
+    <input type="hidden" name="window" value="{{ revenue_portfolio.selected_band.key }}">
+    {% if revenue_portfolio.selected_month %}<input type="hidden" name="month" value="{{ revenue_portfolio.selected_month.key }}">{% endif %}
+    <span class="rev-filter-count"><i class="mdi mdi-filter-variant" aria-hidden="true"></i>{{ portfolio_filters.contract_count }}份合同</span>
+    <select class="form-select form-select-sm" name="customer" aria-label="客户" title="客户" onchange="this.form.submit()"><option value="">全部客户</option>{% for customer in portfolio_filters.customers %}<option value="{{ customer.pk }}"{% if customer.pk|stringformat:"s" == portfolio_filters.values.customer %} selected{% endif %}>{{ customer }}</option>{% endfor %}</select>
+    <select class="form-select form-select-sm" name="project" aria-label="项目" title="项目" onchange="this.form.submit()"><option value="">全部项目</option>{% for project in portfolio_filters.projects %}<option value="{{ project.pk }}"{% if project.pk|stringformat:"s" == portfolio_filters.values.project %} selected{% endif %}>{{ project }}</option>{% endfor %}</select>
+    <select class="form-select form-select-sm" name="contract_type" aria-label="合同类型" title="合同类型" onchange="this.form.submit()"><option value="">全部类型</option>{% for value,label in portfolio_filters.contract_types %}<option value="{{ value }}"{% if value == portfolio_filters.values.contract_type %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <select class="form-select form-select-sm" name="status" aria-label="合同状态" title="合同状态" onchange="this.form.submit()"><option value="">全部状态</option>{% for value,label in portfolio_filters.statuses %}<option value="{{ value }}"{% if value == portfolio_filters.values.status %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <select class="form-select form-select-sm" name="business_owner" aria-label="业务负责人" title="业务负责人" onchange="this.form.submit()"><option value="">全部负责人</option>{% for owner in portfolio_filters.owners %}<option value="{{ owner }}"{% if owner == portfolio_filters.values.business_owner %} selected{% endif %}>{{ owner }}</option>{% endfor %}</select>
+    {% if portfolio_filters.active_count %}<a class="btn btn-sm btn-outline-secondary btn-icon" href="{{ request.path }}?window={{ revenue_portfolio.selected_band.key }}" title="清除筛选" aria-label="清除筛选"><i class="mdi mdi-filter-remove-outline" aria-hidden="true"></i></a>{% endif %}
+  </form>
+{% endblock controls %}
+{% block content %}
+  {% with portfolio=revenue_portfolio %}
+    <style>
+      .rev-portfolio-hero { border-top: 4px solid #2563eb; overflow: hidden; }
+      .rev-portfolio-hero .card-header { background: linear-gradient(110deg, rgba(37,99,235,.13), transparent 62%); }
+      .rev-portfolio-heading { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; }
+      .rev-portfolio-heading h2 { font-size:1.2rem; margin:0; }
+      .rev-portfolio-subtle { color:var(--tblr-secondary); font-size:.78rem; }
+      .rev-portfolio-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:.7rem; }
+      .rev-portfolio-kpi { border:1px solid var(--tblr-border-color); border-radius:.4rem; padding:.75rem; background:var(--tblr-bg-surface); }
+      .rev-portfolio-kpi .label { color:var(--tblr-secondary); font-size:.74rem; }
+      .rev-portfolio-kpi .value { font-size:1.08rem; font-weight:700; margin-top:.2rem; }
+      .rev-band-grid { display:grid; grid-template-columns:repeat(6,minmax(145px,1fr)); gap:.7rem; }
+      .rev-band { display:block; color:inherit; text-decoration:none !important; border:1px solid var(--tblr-border-color); border-left:4px solid #64748b; border-radius:.4rem; padding:.75rem; background:var(--tblr-bg-surface); transition:transform .12s ease, box-shadow .12s ease; }
+      .rev-band:hover,.rev-band:focus,.rev-band:active { color:inherit; text-decoration:none !important; }
+      .rev-band:hover { transform:translateY(-1px); box-shadow:0 .2rem .65rem rgba(15,23,42,.12); }
+      .rev-band.active { outline:2px solid rgba(37,99,235,.3); outline-offset:1px; }
+      .rev-band.danger { border-left-color:#dc2626; }
+      .rev-band.warning { border-left-color:#d97706; }
+      .rev-band.info,.rev-band.primary { border-left-color:#2563eb; }
+      .rev-band .label { color:var(--tblr-secondary); font-size:.75rem; }
+      .rev-band .value { font-size:1.05rem; font-weight:700; margin:.2rem 0; }
+      .rev-band .meta { color:var(--tblr-secondary); font-size:.7rem; }
+      .rev-month-list { display:grid; gap:.65rem; }
+      .rev-month-row { display:grid; grid-template-columns:92px minmax(240px,1fr) 130px; gap:.75rem; align-items:center; color:inherit; text-decoration:none; border-radius:.4rem; padding:.35rem .45rem; margin:-.35rem -.45rem; }
+      .rev-month-row:hover, .rev-month-row:focus-visible { color:inherit; text-decoration:none; background:var(--tblr-bg-surface-secondary); }
+      .rev-month-row.active { box-shadow:inset 0 0 0 2px rgba(37,99,235,.45); background:rgba(37,99,235,.06); }
+      .rev-month-label { color:var(--tblr-secondary); font-size:.78rem; }
+      .rev-month-track { height:20px; border-radius:4px; background:var(--tblr-bg-surface-secondary); overflow:hidden; }
+      .rev-month-scale { height:100%; display:flex; min-width:2px; border-radius:4px; overflow:hidden; }
+      .rev-month-segment.received { background:#16a34a; }
+      .rev-month-segment.invoiced_unreceived { background:#2563eb; }
+      .rev-month-segment.uninvoiced { background:#d97706; }
+      .rev-month-segment.overdue { background:#dc2626; }
+      .rev-month-segment.uncertain { background:#94a3b8; }
+      .rev-month-total { text-align:right; font-weight:650; font-size:.82rem; }
+      .rev-chart-legend { display:flex; flex-wrap:wrap; gap:.35rem 1rem; color:var(--tblr-secondary); font-size:.74rem; }
+      .rev-chart-dot { display:inline-block; width:.65rem; height:.65rem; border-radius:2px; margin-right:.3rem; }
+      .rev-filter-controls { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:.5rem; padding:.5rem .65rem; border:1px solid var(--tblr-border-color); border-radius:.4rem; background:var(--tblr-bg-surface); box-shadow:0 .25rem .75rem rgba(15,23,42,.08); }
+      .rev-filter-controls .form-select { width:8.5rem; min-width:7rem; }
+      .rev-filter-count { display:inline-flex; align-items:center; gap:.25rem; color:var(--tblr-secondary); font-size:.75rem; white-space:nowrap; }
+      @media (max-width:1199px) { .rev-band-grid { grid-template-columns:repeat(3,1fr); } .rev-filter-controls .form-select { width:7.5rem; } }
+      @media (max-width:767px) { .rev-band-grid { grid-template-columns:1fr 1fr; } .rev-month-row { grid-template-columns:76px minmax(120px,1fr); } .rev-month-total { grid-column:2; text-align:left; } .rev-filter-controls { justify-content:flex-start; margin-top:.5rem; } .rev-filter-controls .form-select { width:calc(50% - .25rem); } }
+    </style>
+
+    <div class="card rev-portfolio-hero mb-3">
+      <div class="card-header">
+        <div class="rev-portfolio-heading w-100">
+          <div>
+            <h2>企业应收总览</h2>
+            <div class="rev-portfolio-subtle">统一应收事件口径 · 数据截至 {{ portfolio.as_of_date|date:"Y-m-d" }}</div>
+          </div>
+          <span class="badge text-bg-primary">{{ portfolio.totals.contract_count }} 份合同涉及应收</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="rev-portfolio-kpis">
+          <div class="rev-portfolio-kpi"><div class="label">已形成应收</div><div class="value">{{ portfolio.totals.formed_receivable|floatformat:2|intcomma }}</div></div>
+          <div class="rev-portfolio-kpi"><div class="label">已收款</div><div class="value">{{ portfolio.totals.receipt_total|floatformat:2|intcomma }}</div></div>
+          <div class="rev-portfolio-kpi"><div class="label">未收款</div><div class="value">{{ portfolio.totals.open_receivable|floatformat:2|intcomma }}</div></div>
+          <div class="rev-portfolio-kpi"><div class="label">逾期及逾期计划</div><div class="value text-danger">{{ portfolio.totals.overdue|floatformat:2|intcomma }}</div></div>
+          <div class="rev-portfolio-kpi"><div class="label">未来已排期计划</div><div class="value">{{ portfolio.totals.future_planned|floatformat:2|intcomma }}</div></div>
+          <div class="rev-portfolio-kpi"><div class="label">待触发金额</div><div class="value text-secondary">{{ portfolio.totals.pending_trigger|floatformat:2|intcomma }}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title mb-0">未来应收时间带</h3>
+          <div class="rev-portfolio-subtle">区间互不重叠；待条件触发的计划不填虚假日期</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="rev-band-grid">
+          {% for band in portfolio.bands %}
+            <a class="rev-band {{ band.tone }}{% if band.is_active %} active{% endif %}" href="?{{ band.query_string }}#receivable-details"{% if band.is_active %} aria-current="true"{% endif %}>
+              <div class="label">{{ band.label }}</div>
+              <div class="value">{{ band.amount|floatformat:2|intcomma }}</div>
+              <div class="meta">已形成 {{ band.formed_amount|floatformat:2|intcomma }} · 计划 {{ band.planned_amount|floatformat:2|intcomma }}</div>
+              <div class="meta">{{ band.event_count }} 项 · {{ band.contract_count }} 份合同</div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3" id="receivable-details">
+      <div class="card-header d-flex justify-content-between align-items-center gap-3">
+        <div>
+          <h3 class="card-title mb-0">{{ portfolio.selected_band.label }}明细</h3>
+          <div class="rev-portfolio-subtle">{{ portfolio.selected_band.detail_count }} 项，合计 {{ portfolio.selected_band.amount|floatformat:2|intcomma }}</div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          {% if portfolio.selected_band.details_truncated %}<span class="badge text-bg-warning">仅显示前 {{ portfolio.selected_band.details|length }} 项</span>{% endif %}
+          <a class="btn btn-sm btn-outline-primary" href="?{{ portfolio.selected_band.export_query_string }}"><i class="mdi mdi-download" aria-hidden="true"></i> 导出当前时间带</a>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover table-vcenter mb-0">
+          <thead><tr><th>合同</th><th>应收来源</th><th>类型</th><th>到期时间</th><th>状态</th><th class="text-end">未收/计划金额</th></tr></thead>
+          <tbody>
+            {% for detail in portfolio.selected_band.details %}
+              <tr>
+                <td>{% if detail.contract_url %}<a href="{{ detail.contract_url }}">{{ detail.contract }}</a>{% else %}{{ detail.contract|default:"-" }}{% endif %}</td>
+                <td>{% if detail.source_url %}<a href="{{ detail.source_url }}">{{ detail.source }}</a>{% else %}{{ detail.source }}{% endif %}</td>
+                <td><span class="badge {% if detail.kind == 'formed' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{{ detail.kind_label }}</span>{% if detail.uncertain %} <span class="badge text-bg-warning">日期预计</span>{% endif %}</td>
+                <td>{% if detail.due_date %}{{ detail.due_date|date:"Y-m-d" }}{% else %}待触发{% endif %}<div class="rev-portfolio-subtle">{{ detail.schedule_status }}</div></td>
+                <td>{{ detail.status_label }}</td>
+                <td class="text-end fw-semibold">{{ detail.amount|floatformat:2|intcomma }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-4">该时间带暂无应收或计划明细</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center gap-3">
+        <div>
+          <h3 class="card-title mb-0">未来12个月应收分布</h3>
+          <div class="rev-portfolio-subtle">条形总长按月度金额同比缩放，内部颜色显示当前收款状态</div>
+        </div>
+        <div class="rev-chart-legend">
+          <span><i class="rev-chart-dot" style="background:#16a34a"></i>已收</span>
+          <span><i class="rev-chart-dot" style="background:#2563eb"></i>已开票未收</span>
+          <span><i class="rev-chart-dot" style="background:#d97706"></i>未开票/计划</span>
+          <span><i class="rev-chart-dot" style="background:#dc2626"></i>逾期</span>
+          <span><i class="rev-chart-dot" style="background:#94a3b8"></i>日期不确定</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="rev-month-list">
+          {% for month in portfolio.months %}
+            <a class="rev-month-row{% if month.is_active %} active{% endif %}" href="?{{ month.query_string }}#monthly-details"{% if month.is_active %} aria-current="true"{% endif %} aria-label="查看{{ month.label }}应收明细">
+              <div class="rev-month-label">{{ month.label }}</div>
+              <div class="rev-month-track" title="月度总额 {{ month.total|floatformat:2|intcomma }}">
+                <div class="rev-month-scale" style="width:{{ month.width_percent|floatformat:'2u' }}%">
+                  {% for segment in month.segments %}
+                    <span class="rev-month-segment {{ segment.key }}" style="width:{{ segment.percent|floatformat:'2u' }}%" title="{{ segment.amount|floatformat:2|intcomma }}"></span>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="rev-month-total">{{ month.total|floatformat:2|intcomma }}</div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    {% if portfolio.selected_month %}
+      <div class="card mb-4" id="monthly-details">
+        <div class="card-header d-flex justify-content-between align-items-center gap-3">
+          <div>
+            <h3 class="card-title mb-0">{{ portfolio.selected_month.label }}应收明细</h3>
+            <div class="rev-portfolio-subtle">{{ portfolio.selected_month.detail_count }} 项，月度总额 {{ portfolio.selected_month.total|floatformat:2|intcomma }}</div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            {% if portfolio.selected_month.details_truncated %}<span class="badge text-bg-warning">仅显示前 {{ portfolio.selected_month.details|length }} 项</span>{% endif %}
+            <a class="btn btn-sm btn-outline-primary" href="?{{ portfolio.selected_month.export_query_string }}"><i class="mdi mdi-download" aria-hidden="true"></i> 导出该月</a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover table-vcenter mb-0">
+            <thead><tr><th>合同</th><th>应收来源</th><th>类型</th><th>到期时间</th><th>状态</th><th class="text-end">应收/计划</th><th class="text-end">已收</th><th class="text-end">未收</th></tr></thead>
+            <tbody>
+              {% for detail in portfolio.selected_month.details %}
+                <tr>
+                  <td>{% if detail.contract_url %}<a href="{{ detail.contract_url }}">{{ detail.contract }}</a>{% else %}{{ detail.contract|default:"-" }}{% endif %}</td>
+                  <td>{% if detail.source_url %}<a href="{{ detail.source_url }}">{{ detail.source }}</a>{% else %}{{ detail.source }}{% endif %}</td>
+                  <td><span class="badge {% if detail.kind == 'formed' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{{ detail.kind_label }}</span>{% if detail.uncertain %} <span class="badge text-bg-warning">日期预计</span>{% endif %}</td>
+                  <td>{{ detail.due_date|date:"Y-m-d" }}<div class="rev-portfolio-subtle">{{ detail.schedule_status }}</div></td>
+                  <td>{{ detail.status_label }}</td>
+                  <td class="text-end fw-semibold">{{ detail.amount|floatformat:2|intcomma }}</td>
+                  <td class="text-end text-success">{{ detail.received_amount|floatformat:2|intcomma }}</td>
+                  <td class="text-end{% if detail.outstanding_amount %} text-danger{% endif %}">{{ detail.outstanding_amount|floatformat:2|intcomma }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">该月份暂无应收或计划明细</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
+
+{% endblock content %}

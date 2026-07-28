@@ -29,6 +29,8 @@ from utilities.forms.fields import (
 from utilities.forms.widgets import DatePicker, HTMXSelect
 
 from .constants import ASSIGNEMENT_MODELS, SERVICE_PROVIDER_MODELS
+
+
 from .models import (
     AccountingDimension,
     AccountingDimensionStatusChoices,
@@ -756,3 +758,224 @@ class AccountingDimensionBulkEditForm(NetBoxModelBulkEditForm):
     comments = CommentField(label=_('Comments'))
     nullable_fields = ('comments',)
     model = AccountingDimension
+
+
+
+from .models import (
+    RevenueCustomer, RevenueProject, RevenueContract, RevenueContractProject, RevenueOrder, RevenueContractVersion,
+    RevenueContractLine, RevenueBillingRule, RevenueBillingSegment, RevenueReceivablePlan,
+    RevenueReceivablePlanVersion, RevenueTriggerRecord, RevenueAdjustmentRecord,
+    RevenueReceivableBill, RevenueReceivableLine, RevenueInvoice,
+    RevenueInvoiceLine, RevenueInvoiceMapping, RevenueReceipt, RevenueReceiptAllocation,
+    RevenueSyncLog,
+)
+
+
+class RevenueModelForm(NetBoxModelForm):
+    """Apply revenue-only presentation conventions."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._localize_framework_labels()
+
+    def _localize_framework_labels(self):
+        changelog_field = self.fields.get('changelog_message')
+        if changelog_field is not None:
+            changelog_field.label = _('变更说明')
+
+
+_REVENUE_FORM_FIELDS = {
+    RevenueCustomer: (
+        'name', 'short_name', 'usci', 'finance_code', 'eip_code',
+        'customer_type', 'sales_owner', 'business_owner', 'is_risk',
+        'address_phone', 'bank_account', 'tags',
+    ),
+    RevenueProject: (
+        'name', 'customer', 'project_manager', 'sales_owner',
+        'business_owner', 'project_type', 'status',
+        'accumulated_receivable', 'accumulated_invoice',
+        'accumulated_receipt', 'tags',
+    ),
+    RevenueContract: (
+        'contract_code', 'name', 'customer', 'contract_type', 'projects',
+        'our_party', 'customer_party', 'sign_date', 'start_date', 'end_date',
+        'total_amount', 'is_framework', 'status', 'sales_owner',
+        'business_owner', 'source_system', 'external_id', 'sync_status',
+        'sync_log', 'tags',
+    ),
+    RevenueContractProject: ('contract', 'project', 'tags'),
+    RevenueOrder: (
+        'order_code', 'contract', 'project', 'name', 'amount', 'start_date',
+        'end_date', 'status', 'source_system', 'external_id', 'tags',
+    ),
+    RevenueContractVersion: (
+        'contract', 'version_code', 'change_type', 'start_date', 'end_date',
+        'status', 'tags',
+    ),
+    RevenueContractLine: (
+        'contract', 'contract_version', 'project', 'revenue_order',
+        'order_id', 'product_category', 'charge_item', 'unit_price',
+        'quantity', 'unit', 'valid_from', 'valid_to', 'status', 'tags',
+    ),
+    RevenueBillingRule: (
+        'contract_line', 'contract_version', 'rule_type', 'trigger_event',
+        'trigger_offset_days', 'billing_cycle', 'billing_direction',
+        'bill_generation_day', 'proration_rule', 'rounding_precision',
+        'is_active', 'status', 'tags',
+    ),
+    RevenueBillingSegment: (
+        'contract_line', 'billing_rule', 'segment_start', 'segment_end',
+        'unit_price', 'quantity', 'amount', 'change_trigger',
+        'billing_rule_snapshot', 'tags',
+    ),
+    RevenueReceivablePlan: (
+        'plan_code', 'contract', 'contract_line', 'billing_rule',
+        'charge_item', 'order_id', 'status', 'tags',
+    ),
+    RevenueReceivablePlanVersion: (
+        'plan', 'version_no', 'trigger_type', 'trigger_event', 'offset_days',
+        'planned_date', 'planned_amount', 'effective_from', 'change_reason',
+        'is_current', 'tags',
+    ),
+    RevenueTriggerRecord: (
+        'plan', 'billing_rule', 'plan_version', 'trigger_event',
+        'actual_trigger_date', 'status', 'source_system', 'external_id',
+        'notes', 'tags',
+    ),
+    RevenueAdjustmentRecord: (
+        'plan', 'receivable_line', 'adjustment_type', 'adjustment_date',
+        'amount', 'reason', 'source_system', 'external_id', 'status', 'tags',
+    ),
+    RevenueReceivableBill: (
+        'bill_code', 'customer', 'contract', 'project', 'billing_period',
+        'receivable_date', 'due_date', 'amount', 'adjusted_amount',
+        'net_amount', 'invoiced_amount', 'receipted_amount', 'confirm_status',
+        'invoice_status', 'receipt_status', 'ageing_status', 'risk_status',
+        'tags',
+    ),
+    RevenueReceivableLine: (
+        'bill', 'contract_line', 'billing_rule', 'receivable_plan',
+        'start_date', 'end_date', 'receivable_date', 'due_date', 'amount',
+        'adjusted_amount', 'net_amount', 'risk_status', 'idempotent_key',
+        'tags',
+    ),
+    RevenueInvoice: (
+        'invoice_code', 'customer', 'invoice_type', 'invoice_date', 'amount',
+        'source_system', 'external_id', 'sync_status', 'sync_log', 'tags',
+    ),
+    RevenueInvoiceLine: (
+        'invoice', 'line_no', 'external_line_id', 'item_name', 'amount',
+        'tags',
+    ),
+    RevenueInvoiceMapping: (
+        'receivable_line', 'invoice_line', 'mapped_amount', 'status',
+        'operator', 'approval_batch_no', 'tags',
+    ),
+    RevenueReceipt: (
+        'customer', 'receipt_date', 'amount', 'allocated_total',
+        'unallocated_amount', 'bank_flow_no', 'payer_name', 'status',
+        'source_system', 'external_id', 'sync_status', 'sync_log', 'tags',
+    ),
+    RevenueReceiptAllocation: (
+        'receipt', 'receivable_line', 'invoice_mapping', 'allocated_amount',
+        'allocation_type', 'status', 'operator', 'approval_batch_no', 'tags',
+    ),
+    RevenueSyncLog: (
+        'source_system', 'entity_type', 'entity_id', 'external_id',
+        'sync_direction', 'sync_status', 'request_payload',
+        'response_payload', 'error_message', 'tags',
+    ),
+}
+
+_REVENUE_FORM_MODELS = tuple(_REVENUE_FORM_FIELDS)
+
+for _revenue_model in _REVENUE_FORM_MODELS:
+    _meta = type(
+        'Meta',
+        (),
+        {
+            'model': _revenue_model,
+            'fields': _REVENUE_FORM_FIELDS[_revenue_model],
+        },
+    )
+    globals()[f'{_revenue_model.__name__}Form'] = type(
+        f'{_revenue_model.__name__}Form',
+        (RevenueModelForm,),
+        {'Meta': _meta},
+    )
+    globals()[f'{_revenue_model.__name__}FilterForm'] = type(
+        f'{_revenue_model.__name__}FilterForm',
+        (NetBoxModelFilterSetForm,),
+        {'model': _revenue_model},
+    )
+
+
+class RevenueOrderForm(RevenueModelForm):
+    contract = DynamicModelChoiceField(
+        queryset=RevenueContract.objects.all(),
+        label='合同',
+    )
+    project = DynamicModelChoiceField(
+        queryset=RevenueProject.objects.all(),
+        query_params={'contract_id': '$contract'},
+        label='项目',
+    )
+
+    class Meta:
+        model = RevenueOrder
+        fields = _REVENUE_FORM_FIELDS[RevenueOrder]
+
+
+class RevenueContractLineForm(RevenueModelForm):
+    contract = DynamicModelChoiceField(
+        queryset=RevenueContract.objects.all(),
+        label='合同',
+    )
+    contract_version = DynamicModelChoiceField(
+        queryset=RevenueContractVersion.objects.all(),
+        query_params={'contract_id': '$contract'},
+        label='合同版本',
+    )
+    project = DynamicModelChoiceField(
+        queryset=RevenueProject.objects.all(),
+        query_params={'contract_id': '$contract'},
+        label='项目',
+    )
+    revenue_order = DynamicModelChoiceField(
+        queryset=RevenueOrder.objects.all(),
+        query_params={
+            'contract_id': '$contract',
+            'project_id': '$project',
+        },
+        required=False,
+        label='订单/开工单',
+        help_text='仅显示所选合同及项目下的订单；原订单号字段仅用于历史数据核对。',
+    )
+
+    class Meta:
+        model = RevenueContractLine
+        fields = _REVENUE_FORM_FIELDS[RevenueContractLine]
+
+class RevenueReceivableGenerationForm(forms.Form):
+    billing_period = forms.CharField(
+        max_length=7,
+        label='\u8d26\u671f',
+        help_text='\u683c\u5f0f\uff1aYYYY-MM\uff0c\u4f8b\u5982 2026-07\u3002',
+    )
+    confirm_status = forms.ChoiceField(
+        choices=(('draft', '\u8349\u7a3f'), ('confirmed', '\u5df2\u786e\u8ba4')),
+        initial='draft',
+        label='\u751f\u6210\u72b6\u6001',
+    )
+
+    def clean_billing_period(self):
+        value = self.cleaned_data['billing_period']
+        try:
+            year, month = value.split('-')
+            year = int(year)
+            month = int(month)
+            if month < 1 or month > 12:
+                raise ValueError
+        except ValueError:
+            raise ValidationError('\u8d26\u671f\u683c\u5f0f\u5fc5\u987b\u4e3a YYYY-MM\u3002')
+        return f'{year:04d}-{month:02d}'

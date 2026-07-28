@@ -7,6 +7,9 @@
   <li class="breadcrumb-item"><a href="{% url 'plugins:netbox_contract:contract_list' %}?external_party={{ object.external_party.pk }}">{{ object.external_party }}</a></li>
 {% endblock %}
 {% block content %}
+  <style>
+    .detail-table-container ul.pagination { display: none; }
+  </style>
   <div class="row mb-3">
     <div class="col col-md-6">
       <div class="card">
@@ -188,7 +191,8 @@
         <h5 class="card-header">
           {% trans "Invoice template lines" %}
         </h5>
-          {% render_table invoicelines_table %}
+          <div class="detail-table-container">{% render_table invoicelines_table %}</div>
+          {% include 'netbox_contract/inc/detail_table_pagination.html' with table=invoicelines_table page_param="invoice_lines_page" base_query=invoice_lines_query %}
       </div>
       {% endif %}
     </div>
@@ -197,7 +201,8 @@
     <div class="col col-md-12">
       <div class="card">
         <h5 class="card-header">{% trans "Assignments" %}</h5>
-          {% render_table assignments_table %}
+          <div class="detail-table-container">{% render_table assignments_table %}</div>
+          {% include 'netbox_contract/inc/detail_table_pagination.html' with table=assignments_table page_param="assignments_page" base_query=assignments_query %}
       </div>
     </div>
   </div>
@@ -206,7 +211,8 @@
     <div class="col col-md-12">
       <div class="card">
         <h5 class="card-header">{% trans "childs" %}</h5>
-          {% render_table childs_table %}
+          <div class="detail-table-container">{% render_table childs_table %}</div>
+          {% include 'netbox_contract/inc/detail_table_pagination.html' with table=childs_table page_param="children_page" base_query=children_query %}
       </div>
     </div>
   </div>
@@ -226,7 +232,8 @@
           </div>
           {% endif %}
         </h5>
-          {% render_table invoices_table %}
+          <div class="detail-table-container">{% render_table invoices_table %}</div>
+          {% include 'netbox_contract/inc/detail_table_pagination.html' with table=invoices_table page_param="invoices_page" base_query=invoices_query %}
       </div>
     </div>
   </div>

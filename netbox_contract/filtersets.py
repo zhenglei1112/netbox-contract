@@ -155,3 +155,91 @@ class AccountingDimensionFilterSet(NetBoxModelFilterSet):
 
     def search(self, queryset, name, value):
         return queryset.filter(Q(comments__icontains=value) | Q(name__icontains=value))
+
+from .models import (
+    RevenueCustomer, RevenueProject, RevenueContract, RevenueContractProject, RevenueOrder, RevenueContractVersion,
+    RevenueContractLine, RevenueBillingRule, RevenueBillingSegment, RevenueReceivablePlan,
+    RevenueReceivablePlanVersion, RevenueTriggerRecord, RevenueAdjustmentRecord,
+    RevenueReceivableBill, RevenueReceivableLine, RevenueInvoice,
+    RevenueInvoiceLine, RevenueInvoiceMapping, RevenueReceipt, RevenueReceiptAllocation,
+    RevenueSyncLog,
+)
+
+
+class RevenueCustomerFilterSet(NetBoxModelFilterSet):
+    class Meta:
+        model = RevenueCustomer
+        fields = ('id', 'name', 'short_name', 'usci', 'customer_type', 'sales_owner', 'business_owner', 'is_risk')
+
+    def search(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value) | Q(short_name__icontains=value) | Q(usci__icontains=value))
+
+
+class RevenueProjectFilterSet(NetBoxModelFilterSet):
+    contract_id = django_filters.NumberFilter(method='filter_contract_id')
+    class Meta:
+        model = RevenueProject
+        fields = ('id', 'name', 'customer', 'project_type', 'status', 'sales_owner', 'business_owner')
+
+    def filter_contract_id(self, queryset, name, value):
+        return queryset.filter(
+            Q(project_contracts__contract_id=value) | Q(contract_lines__contract_id=value)
+        ).distinct()
+
+    def search(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value) | Q(customer__name__icontains=value))
+
+
+class RevenueContractFilterSet(NetBoxModelFilterSet):
+    class Meta:
+        model = RevenueContract
+        fields = ('id', 'contract_code', 'name', 'customer', 'contract_type', 'status', 'start_date', 'end_date')
+
+    def search(self, queryset, name, value):
+        return queryset.filter(Q(contract_code__icontains=value) | Q(name__icontains=value) | Q(customer__name__icontains=value))
+
+
+_REVENUE_FILTER_MODELS = [
+    RevenueContractProject, RevenueOrder, RevenueContractVersion, RevenueContractLine, RevenueBillingRule,
+    RevenueBillingSegment, RevenueReceivablePlan, RevenueReceivablePlanVersion, RevenueTriggerRecord,
+    RevenueAdjustmentRecord, RevenueReceivableBill, RevenueReceivableLine, RevenueInvoice,
+    RevenueInvoiceLine, RevenueInvoiceMapping,
+    RevenueReceipt, RevenueReceiptAllocation, RevenueSyncLog,
+]
+
+for _revenue_model in _REVENUE_FILTER_MODELS:
+    _meta = type('Meta', (), {'model': _revenue_model, 'fields': ('id',)})
+    globals()[f'{_revenue_model.__name__}FilterSet'] = type(
+        f'{_revenue_model.__name__}FilterSet',
+        (NetBoxModelFilterSet,),
+        {'Meta': _meta},
+    )
+
+class RevenueOrderFilterSet(NetBoxModelFilterSet):
+    contract_id = django_filters.NumberFilter(field_name='contract_id')
+    project_id = django_filters.NumberFilter(field_name='project_id')
+
+    class Meta:
+        model = RevenueOrder
+        fields = ('id', 'order_code', 'contract', 'project', 'status', 'source_system')
+
+    def search(self, queryset, name, value):
+        return queryset.filter(Q(order_code__icontains=value) | Q(name__icontains=value))
+
+
+class RevenueContractVersionFilterSet(NetBoxModelFilterSet):
+    contract_id = django_filters.NumberFilter(field_name='contract_id')
+
+    class Meta:
+        model = RevenueContractVersion
+        fields = ('id', 'contract', 'version_code', 'status')
+
+
+class RevenueContractLineFilterSet(NetBoxModelFilterSet):
+    contract_id = django_filters.NumberFilter(field_name='contract_id')
+    project_id = django_filters.NumberFilter(field_name='project_id')
+    revenue_order_id = django_filters.NumberFilter(field_name='revenue_order_id')
+
+    class Meta:
+        model = RevenueContractLine
+        fields = ('id', 'contract', 'project', 'revenue_order', 'status')
