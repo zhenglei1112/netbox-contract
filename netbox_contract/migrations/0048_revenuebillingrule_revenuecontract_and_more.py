@@ -10,7 +10,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extras', '0138_customfieldchoiceset_choice_colors'),
         ('netbox_contract', '0047_alter_contract_external_party_object_type'),
     ]
 

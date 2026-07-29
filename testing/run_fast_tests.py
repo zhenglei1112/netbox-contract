@@ -18,6 +18,7 @@ TEST_FILES = (
     'test_datetime_utc_save.py',
     'test_detail_pagination.py',
     'test_revenue_plan_ui_visibility.py',
+    'test_migration_dependencies.py',
 )
 
 
