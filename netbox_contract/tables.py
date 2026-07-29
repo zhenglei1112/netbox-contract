@@ -243,9 +243,27 @@ class InvoiceListTable(NetBoxTable):
     status = columns.ChoiceFieldColumn(
         verbose_name=_('Status'),
     )
-    tags = columns.TagColumn(url_name='plugins:netbox_contract:invoiceline_list')
+    tags = columns.TagColumn(url_name='plugins:netbox_contract:invoice_list')
     actions = columns.ActionsColumn(
         extra_buttons="""
+            {% if contract_faults_url and record.period_start and record.period_end %}
+                <button type="button"
+                        hx-get="{{ contract_faults_url }}?fault_occurrence_time_after={{ record.period_start|date:'Y-m-d' }}&amp;fault_occurrence_time_before={{ record.period_end|date:'Y-m-d' }}{% for tag in record.tags.all %}&amp;fault_tag={{ tag.pk }}{% endfor %}"
+                        hx-target="#contract_otn_faults"
+                        hx-swap="outerHTML"
+                        hx-push-url="false"
+                        hx-indicator="find .invoice-fault-filter-indicator"
+                        hx-disabled-elt="this"
+                        class="btn btn-sm btn-outline-primary position-relative"
+                        title="筛选对应故障"
+                        aria-label="筛选对应故障">
+                    <i class="mdi mdi-filter-outline"></i>
+                    <span class="spinner-border spinner-border-sm htmx-indicator invoice-fault-filter-indicator position-absolute top-50 start-50 translate-middle"
+                          role="status"
+                          aria-label="正在筛选对应故障"></span>
+                </button>
+            {% endif %}
+
             <form method="post" action="{% url 'plugins:netbox_contract:invoice_generate_seal_reason' %}" style="display: inline;">
                 {% csrf_token %}
                 <input type="hidden" name="contract_name" value="{{ record.contracts.all.0.name|default:'' }}">
@@ -282,6 +300,7 @@ class InvoiceListTable(NetBoxTable):
             'amount',
             'documents',
             'comments',
+            'tags',
             'actions',
         )
         default_columns = (
@@ -292,6 +311,7 @@ class InvoiceListTable(NetBoxTable):
             'period_start',
             'period_end',
             'amount',
+            'tags',
         )
 
 

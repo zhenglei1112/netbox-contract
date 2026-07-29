@@ -1,30 +1,61 @@
 {% load i18n %}
 {% if table.page %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 py-2 border-top">
-  <div class="text-muted small">
-    {{ table.page.start_index }}-{{ table.page.end_index }} / {{ table.paginator.count }}
-  </div>
-  <div class="d-flex align-items-center gap-2">
-    <label class="d-flex align-items-center gap-1 small text-muted mb-0">
-      <span>{% trans "Per page" %}</span>
-      <select class="form-select form-select-sm" aria-label="{% trans 'Per page' %}"
-              onchange="const url = new URL(window.location.href); url.searchParams.set('per_page', this.value); ['invoice_lines_page', 'assignments_page', 'children_page', 'invoices_page', 'contracts_page'].forEach((key) => url.searchParams.delete(key)); window.location.assign(url.toString());">
-        {% for size in detail_page_sizes %}
-          <option value="{{ size }}" {% if size == detail_per_page %}selected{% endif %}>{{ size }}</option>
+  <div class="d-flex justify-content-between align-items-center border-top p-2">
+
+    {# NetBox's paginator fixes the page parameter as "page". Keep its markup, but use this table's independent parameter. #}
+    {% if table.paginator.num_pages > 1 %}
+    <nav aria-label="{% trans 'Page selection' %}">
+      <ul class="pagination mb-0">
+        {% if table.page.has_previous %}
+          <li class="page-item">
+            <a href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ table.page.previous_page_number }}" class="page-link" aria-label="{% trans 'Previous page' %}">
+              <i class="mdi mdi-chevron-left" aria-hidden="true"></i>
+            </a>
+          </li>
+        {% endif %}
+
+        {% for p in table.page.smart_pages %}
+          <li class="page-item{% if table.page.number == p %} active{% endif %}"{% if table.page.number == p %} aria-current="page"{% endif %}>
+            {% if p %}
+              <a href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ p }}" class="page-link {% if table.page.number == p %} active{% endif %}" aria-label="{% blocktrans with num=p %}Page {{ num }}{% endblocktrans %}">
+                {{ p }}
+              </a>
+            {% else %}
+              <span class="page-link" disabled aria-hidden="true">&hellip;</span>
+            {% endif %}
+          </li>
         {% endfor %}
-      </select>
-    </label>
-    {% if table.page.has_previous %}
-      <a class="btn btn-sm btn-outline-secondary" href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ table.page.previous_page_number }}">{% trans "Previous" %}</a>
-    {% else %}
-      <span class="btn btn-sm btn-outline-secondary disabled">{% trans "Previous" %}</span>
+
+        {% if table.page.has_next %}
+          <li class="page-item">
+            <a href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ table.page.next_page_number }}" class="page-link" aria-label="{% trans 'Next page' %}">
+              <i class="mdi mdi-chevron-right" aria-hidden="true"></i>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
     {% endif %}
-    <span class="small text-muted">{{ table.page.number }} / {{ table.paginator.num_pages }}</span>
-    {% if table.page.has_next %}
-      <a class="btn btn-sm btn-outline-secondary" href="?{% if base_query %}{{ base_query }}&amp;{% endif %}{{ page_param }}={{ table.page.next_page_number }}">{% trans "Next" %}</a>
-    {% else %}
-      <span class="btn btn-sm btn-outline-secondary disabled">{% trans "Next" %}</span>
-    {% endif %}
+
+    <small class="text-end text-muted">
+      {% blocktrans trimmed with start=table.page.start_index end=table.page.end_index total=table.page.paginator.count %}
+        Showing {{ start }}-{{ end }} of {{ total }}
+      {% endblocktrans %}
+    </small>
+
+    <nav aria-label="{% trans 'Pagination options' %}">
+      <div class="dropdown dropdown-menu-end">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          {% trans "Per Page" %}
+        </button>
+        <ul class="dropdown-menu">
+          {% for n in table.page.paginator.get_page_lengths %}
+            <li>
+              <a href="?{% if detail_per_page_query %}{{ detail_per_page_query }}&amp;{% endif %}per_page={{ n }}" class="dropdown-item">{{ n }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </nav>
   </div>
-</div>
 {% endif %}

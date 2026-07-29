@@ -8,15 +8,14 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.paginator import EmptyPage
 from django.db import transaction
 from django.db.models import Case, F, Q, Sum, When
 from django.db.models.functions import Round
 from django.shortcuts import get_object_or_404, redirect, render
-from django_tables2 import RequestConfig
 from netbox.views import generic
 from netbox.views.generic.utils import get_prerequisite_model
 from utilities.forms import restrict_form_fields
+from utilities.paginator import get_paginate_count
 from utilities.querydict import normalize_querydict
 from utilities.views import ObjectPermissionRequiredMixin, register_model_view
 
@@ -44,23 +43,13 @@ from .models import (
     ServiceProvider,
 )
 
-DETAIL_PAGE_SIZES = (25, 50, 100, 250, 500)
-
-
-def _detail_per_page(params):
-    try:
-        value = int(params.get('per_page', 25))
-    except (TypeError, ValueError):
-        return 25
-    return value if value in DETAIL_PAGE_SIZES else 25
-
-
-def _detail_page(params, key):
-    try:
-        value = int(params.get(key, 1))
-    except (TypeError, ValueError):
-        return 1
-    return value if value > 0 else 1
+DETAIL_PAGE_PARAMS = (
+    'invoice_lines_page',
+    'assignments_page',
+    'children_page',
+    'invoices_page',
+    'contracts_page',
+)
 
 
 def _detail_query(params, page_key, per_page):
@@ -69,11 +58,19 @@ def _detail_query(params, page_key, per_page):
     query['per_page'] = per_page
     return query.urlencode()
 
-def _paginate_detail_table(table, page, per_page):
-    try:
-        table.paginate(page=page, per_page=per_page)
-    except EmptyPage:
-        table.paginate(page=max(table.paginator.num_pages, 1), per_page=per_page)
+
+def _detail_per_page_query(params):
+    query = params.copy()
+    query.pop('per_page', None)
+    for page_key in DETAIL_PAGE_PARAMS:
+        query.pop(page_key, None)
+    return query.urlencode()
+
+
+def _configure_detail_table(table, request, page_param):
+    table.prefix = page_param.removesuffix('page')
+    table.configure(request)
+
 
 plugin_settings = settings.PLUGINS_CONFIG['netbox_contract']
 
@@ -248,17 +245,13 @@ class ContractView(generic.ObjectView):
     )
 
     def get_extra_context(self, request, instance):
-        per_page = _detail_per_page(request.GET)
+        per_page = get_paginate_count(request)
         invoices_table = tables.InvoiceListTable(
-            instance.invoices.exclude(template=True)
+            instance.invoices.exclude(template=True).prefetch_related('tags')
         )
         invoices_table.columns.hide('contracts')
-        RequestConfig(request, paginate=False).configure(invoices_table)
-        _paginate_detail_table(
-            invoices_table,
-            _detail_page(request.GET, 'invoices_page'),
-            per_page,
-        )
+        _configure_detail_table(invoices_table, request, 'invoices_page')
+        invoices_table.columns.show('tags')
         assignments_table = tables.ContractAssignmentContractTable(
             instance.assignments.all()
         )
@@ -268,28 +261,13 @@ class ContractView(generic.ObjectView):
                 invoice_template.invoicelines.all()
             )
             invoicelines_table.columns.hide('invoice')
-            RequestConfig(request, paginate=False).configure(invoicelines_table)
-            _paginate_detail_table(
-                invoicelines_table,
-                _detail_page(request.GET, 'invoice_lines_page'),
-                per_page,
-            )
+            _configure_detail_table(invoicelines_table, request, 'invoice_lines_page')
         else:
             invoicelines_table = None
-        RequestConfig(request, paginate=False).configure(assignments_table)
-        _paginate_detail_table(
-            assignments_table,
-            _detail_page(request.GET, 'assignments_page'),
-            per_page,
-        )
+        _configure_detail_table(assignments_table, request, 'assignments_page')
         if instance.childs.all():
             childs_table = tables.ContractListBottomTable(instance.childs.all())
-            RequestConfig(request, paginate=False).configure(childs_table)
-            _paginate_detail_table(
-                childs_table,
-                _detail_page(request.GET, 'children_page'),
-                per_page,
-            )
+            _configure_detail_table(childs_table, request, 'children_page')
         else:
             childs_table = None
 
@@ -302,8 +280,7 @@ class ContractView(generic.ObjectView):
             'invoicelines_table': invoicelines_table,
             'assignments_table': assignments_table,
             'childs_table': childs_table,
-            'detail_per_page': per_page,
-            'detail_page_sizes': DETAIL_PAGE_SIZES,
+            'detail_per_page_query': _detail_per_page_query(request.GET),
             'invoice_lines_query': _detail_query(request.GET, 'invoice_lines_page', per_page),
             'assignments_query': _detail_query(request.GET, 'assignments_page', per_page),
             'children_query': _detail_query(request.GET, 'children_page', per_page),
@@ -384,30 +361,19 @@ class InvoiceView(generic.ObjectView):
     queryset = Invoice.objects.all()
 
     def get_extra_context(self, request, instance):
-        per_page = _detail_per_page(request.GET)
+        per_page = get_paginate_count(request)
         contracts_table = tables.ContractListTable(instance.contracts.all())
-        RequestConfig(request, paginate=False).configure(contracts_table)
-        _paginate_detail_table(
-            contracts_table,
-            _detail_page(request.GET, 'contracts_page'),
-            per_page,
-        )
+        _configure_detail_table(contracts_table, request, 'contracts_page')
         invoicelines_table = tables.InvoiceLineListTable(instance.invoicelines.all())
         invoicelines_table.columns.hide('invoice')
-        RequestConfig(request, paginate=False).configure(invoicelines_table)
-        _paginate_detail_table(
-            invoicelines_table,
-            _detail_page(request.GET, 'invoice_lines_page'),
-            per_page,
-        )
+        _configure_detail_table(invoicelines_table, request, 'invoice_lines_page')
         hidden_fields = plugin_settings.get('hidden_invoice_fields')
 
         return {
             'hidden_fields': hidden_fields,
             'contracts_table': contracts_table,
             'invoicelines_table': invoicelines_table,
-            'detail_per_page': per_page,
-            'detail_page_sizes': DETAIL_PAGE_SIZES,
+            'detail_per_page_query': _detail_per_page_query(request.GET),
             'invoice_lines_query': _detail_query(request.GET, 'invoice_lines_page', per_page),
             'contracts_query': _detail_query(request.GET, 'contracts_page', per_page),
         }

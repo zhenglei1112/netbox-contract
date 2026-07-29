@@ -11,9 +11,6 @@
   </li>
 {% endblock %}
 {% block content %}
-  <style>
-    .detail-table-container ul.pagination { display: none; }
-  </style>
   <div class="row mb-3">
     <div class="col col-md-6">
       <div class="card">
@@ -90,7 +87,7 @@
               </a>
             </div>
           </h5>
-            <div class="detail-table-container">{% render_table invoicelines_table %}</div>
+            <div class="detail-table-container table-responsive">{% render_table invoicelines_table 'inc/table.html' %}</div>
             {% include 'netbox_contract/inc/detail_table_pagination.html' with table=invoicelines_table page_param="invoice_lines_page" base_query=invoice_lines_query %}
         </div>
       </div>
@@ -99,7 +96,7 @@
       <div class="col col-md-12">
         <div class="card">
           <h5 class="card-header">{% trans "Contracts" %}</h5>
-            <div class="detail-table-container">{% render_table contracts_table %}</div>
+            <div class="detail-table-container table-responsive">{% render_table contracts_table 'inc/table.html' %}</div>
             {% include 'netbox_contract/inc/detail_table_pagination.html' with table=contracts_table page_param="contracts_page" base_query=contracts_query %}
         </div>
       </div>
